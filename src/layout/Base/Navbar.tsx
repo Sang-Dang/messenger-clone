@@ -12,10 +12,11 @@ import {
 } from '@/components/ui'
 import { auth } from '@/firebase'
 import { GoogleAuthProvider, signInWithPopup } from 'firebase/auth'
+import { useAuthState } from 'react-firebase-hooks/auth'
 import { useNavigate } from 'react-router-dom'
 
-export default function Navbar() {
-    const user = auth.currentUser
+const Navbar = () => {
+    const [user] = useAuthState(auth)
     const navigate = useNavigate()
 
     function handleSignin() {
@@ -64,3 +65,5 @@ export default function Navbar() {
         </div>
     )
 }
+
+export default Navbar

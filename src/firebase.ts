@@ -24,6 +24,7 @@ export const analytics = getAnalytics(app)
 export const db = getFirestore(app)
 
 auth.onAuthStateChanged(function (user) {
+    // update avatar for every logind
     if (user) {
         const docRef = doc(db, 'users', user.uid)
         setDoc(docRef, {

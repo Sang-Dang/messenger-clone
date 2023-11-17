@@ -1,12 +1,13 @@
 import Navbar from '@/layout/Base/Navbar'
+import { memo } from 'react'
 import { Outlet } from 'react-router-dom'
 
 export default function BaseLayout() {
-    console.log('RENDER')
+    const MemoNavbar = memo(Navbar)
 
     return (
         <>
-            <Navbar />
+            <MemoNavbar />
             <Outlet />
         </>
     )

@@ -1,7 +1,6 @@
 import { Avatar, AvatarImage } from '@/components/ui'
 import { cn } from '@/lib/utils'
 import { AvatarFallback } from '@radix-ui/react-avatar'
-import React from 'react'
 
 type Props = {
     variant: 'sender' | 'receiver'
