@@ -1,10 +1,10 @@
 import ProtectedRoute from '@/layout/ProtectedRoute'
 import BaseLayout from '@/layout/Base'
 import RootLayout from '@/layout/Root'
-import Chat from '@/pages/Chat'
 import Home from '@/pages/Home'
 import Test from '@/pages/Test'
 import { Route, createBrowserRouter, createRoutesFromElements } from 'react-router-dom'
+import ChatPage from '@/pages/Chat'
 
 const routes = createBrowserRouter(
     createRoutesFromElements(
@@ -12,7 +12,7 @@ const routes = createBrowserRouter(
             <Route element={<BaseLayout />}>
                 <Route path="/" element={<Home />} />
                 <Route element={<ProtectedRoute />}>
-                    <Route path="/chat" element={<Chat />} />
+                    <Route path="/chat" element={<ChatPage />} />
                 </Route>
             </Route>
             <Route path="/test" element={<Test />} />

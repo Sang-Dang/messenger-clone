@@ -29,7 +29,8 @@ auth.onAuthStateChanged(function (user) {
         const docRef = doc(db, 'users', user.uid)
         setDoc(docRef, {
             avatar: user.photoURL,
-            name: user.displayName
+            name: user.displayName,
+            email: user.email
         })
     }
 })
