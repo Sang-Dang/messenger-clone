@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { Button, Toaster, useToast } from '@/components/ui'
 import { db } from '@/firebase'
+import ConversationView from '@/pages/Chat/components/ConversationView'
 import {
     QueryDocumentSnapshot,
     SnapshotOptions,
@@ -91,18 +92,5 @@ export default function Test() {
         })
     }
 
-    return (
-        <>
-            <div className="grid h-screen w-screen place-items-center">
-                <div className="flex flex-col gap-5">
-                    <div>
-                        <Button onClick={handlePost}>POST DATA</Button>
-                    </div>
-                    <div>
-                        <Button onClick={handleGetMany}>GET DATA</Button>
-                    </div>
-                </div>
-            </div>
-        </>
-    )
+    return <ConversationView />
 }

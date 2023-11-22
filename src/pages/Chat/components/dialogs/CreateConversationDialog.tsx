@@ -1,10 +1,6 @@
 import { CreateChat } from '@/api/chat'
 import { User, UserConverter } from '@/classes/User'
-import HighlightedSubstring from '@/components/HighlightedString'
 import {
-    Avatar,
-    AvatarFallback,
-    AvatarImage,
     Button,
     Dialog,
     DialogContent,
@@ -18,9 +14,8 @@ import {
 } from '@/components/ui'
 import { db } from '@/firebase'
 import useRefresh from '@/lib/hooks/useRefresh'
-import { cn } from '@/lib/utils'
-import { DocumentData, QueryDocumentSnapshot, QuerySnapshot, collection, query } from 'firebase/firestore'
-import { Check } from 'lucide-react'
+import UserCard from '@/pages/Chat/components/common/UserCard'
+import { DocumentData, QuerySnapshot, collection, query } from 'firebase/firestore'
 import { ReactNode, useEffect, useState } from 'react'
 import { useCollectionOnce } from 'react-firebase-hooks/firestore'
 
@@ -31,11 +26,17 @@ export default function CreateConversationDialog({ children }: CreateConversatio
     const [isDialogOpen, setIsDialogOpen] = useState(false)
     const [isUserSelected, setIsUserSelected] = useState<Set<string>>(new Set()) // slight prop drilling here because submit is in footer
     const [value, loading, error] = useCollectionOnce(query(collection(db, 'users')).withConverter(UserConverter))
+    const [step, setStep] = useState<number>(1)
     const refresh = useRefresh()
 
     useEffect(() => {
         setIsUserSelected(new Set()) // sets don't trigger rerender fuck react
     }, [isDialogOpen])
+
+    function handleCloseDialog(value: boolean) {
+        setIsDialogOpen(value)
+        setStep(1)
+    }
 
     function handleSelect(id: string) {
         if (isUserSelected.has(id)) {
@@ -73,13 +74,22 @@ export default function CreateConversationDialog({ children }: CreateConversatio
 
     return (
         <>
-            <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+            <Dialog open={isDialogOpen} onOpenChange={handleCloseDialog}>
                 <DialogTrigger asChild>{children}</DialogTrigger>
                 <DialogContent>
                     <DialogHeader className="font-bold">Start a conversation</DialogHeader>
                     <DialogDescription>Who do you want to talk to? Please select a user below!</DialogDescription>
                     <div className="mt-5">
-                        <ContentLoader isUserSelected={isUserSelected} handleSelect={handleSelect} data={value!} loading={loading} error={error} />
+                        {step === 1 && (
+                            <SelectUserForm
+                                isUserSelected={isUserSelected}
+                                handleSelect={handleSelect}
+                                data={value!}
+                                loading={loading}
+                                error={error}
+                            />
+                        )}
+                        {step === 2 && <ChatMetadataForm />}
                     </div>
                     <DialogFooter>
                         {isUserSelected.size > 0 ? (
@@ -91,7 +101,7 @@ export default function CreateConversationDialog({ children }: CreateConversatio
                                 <Button variant="outline">Cancel</Button>
                             </DialogTrigger>
                         )}
-                        <Button onClick={handleSubmit} disabled={isUserSelected.size === 0}>
+                        <Button onClick={() => setStep(2)} disabled={isUserSelected.size === 0}>
                             {isUserSelected.size > 0 ? (
                                 <>
                                     Start conversation with&nbsp;
@@ -110,14 +120,14 @@ export default function CreateConversationDialog({ children }: CreateConversatio
     )
 }
 
-type ContentLoaderProps = {
+type SelectUserFormProps = {
     isUserSelected: Set<string>
     handleSelect: (id: string) => void
     data: QuerySnapshot<User, DocumentData>
     loading: boolean
     error: Error | undefined
 }
-function ContentLoader({ isUserSelected, handleSelect, data, loading, error }: ContentLoaderProps) {
+function SelectUserForm({ isUserSelected, handleSelect, data, loading, error }: SelectUserFormProps) {
     const [searchValue, setSearchValue] = useState('')
 
     if (loading) {
@@ -131,7 +141,14 @@ function ContentLoader({ isUserSelected, handleSelect, data, loading, error }: C
     return (
         <>
             <div className="mb-4">
-                <Input placeholder="Search by Name or Email" value={searchValue} onChange={(e) => setSearchValue(e.target.value)} />
+                <Input
+                    placeholder="Search by Name or Email"
+                    className="w-1/2"
+                    value={searchValue}
+                    onChange={(e) => setSearchValue(e.target.value)}
+                    autoComplete="off"
+                    aria-autocomplete="none"
+                />
             </div>
             <ScrollArea className="h-max max-h-96 overflow-y-auto">
                 {data.docs
@@ -148,47 +165,11 @@ function ContentLoader({ isUserSelected, handleSelect, data, loading, error }: C
     )
 }
 
-type UserCardProps = {
-    doc: QueryDocumentSnapshot<User, DocumentData>
-    isUserSelected: Set<string>
-    handleSelect: (id: string) => void
-    searchTerm: string
-}
-function UserCard({ doc, isUserSelected, handleSelect, searchTerm }: UserCardProps) {
-    const refresh = useRefresh()
-    const isSelected = isUserSelected.has(doc.id)
-
-    function handleSelectWrapper(id: string) {
-        handleSelect(id)
-        refresh()
-    }
-
+type ChatMetadataFormProps = {}
+function ChatMetadataForm({}: ChatMetadataFormProps) {
     return (
-        <>
-            <button
-                key={doc.id}
-                className={cn(
-                    'mb-2 flex w-full cursor-pointer gap-3 rounded-lg border-2 border-neutral-200/30 bg-neutral-50/30 p-3 text-left transition-all hover:border-neutral-50/30 hover:shadow-md focus:border-neutral-50/30 focus:shadow-md focus:outline-none',
-                    isSelected && 'border-blue-500/50 bg-blue-500/50 shadow-md'
-                )}
-                onClick={() => handleSelectWrapper(doc.id)}
-            >
-                <Avatar className="rounded-lg">
-                    <AvatarImage src={doc.data().avatar} alt={doc.data().name} />
-                    <AvatarFallback>{doc.data().name.slice(0, 2)}</AvatarFallback>
-                </Avatar>
-                <div className="flex flex-grow flex-col justify-center gap-1">
-                    <h6 className="text-lg font-bold leading-none">
-                        <HighlightedSubstring original={doc.data().name} substring={searchTerm} />
-                    </h6>
-                    <p className="text-xs">
-                        <HighlightedSubstring original={doc.data().email} substring={searchTerm} />
-                    </p>
-                </div>
-                <div className="flex items-center justify-center gap-2">
-                    <div className="grid h-5 w-5 place-items-center rounded-lg bg-neutral-100">{isSelected && <Check className="w-4" />}</div>
-                </div>
-            </button>
-        </>
+        <div>
+            <Input />
+        </div>
     )
 }

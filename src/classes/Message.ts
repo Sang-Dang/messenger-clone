@@ -1,4 +1,4 @@
-import { QueryDocumentSnapshot, SnapshotOptions } from 'firebase/firestore'
+import { QueryDocumentSnapshot, SnapshotOptions, Timestamp } from 'firebase/firestore'
 
 export class Message {
     id: string
@@ -19,12 +19,12 @@ export const MessageConverter = {
         return {
             userId: message.userId,
             message: message.message,
-            createdOn: message.createdOn
+            createdOn: Timestamp.fromDate(new Date(message.createdOn))
         }
     },
     fromFirestore: (snapshot: QueryDocumentSnapshot, options: SnapshotOptions) => {
         const data = snapshot.data(options)
         const id = snapshot.id
-        return new Message(id, data.userId, data.message, data.createdOn)
+        return new Message(id, data.userId, data.message, (data.createdOn as Timestamp).toDate().toString())
     }
 }

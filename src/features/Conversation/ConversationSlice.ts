@@ -27,16 +27,27 @@ export const conversationSlice = createSlice({
     name: 'conversation',
     initialState,
     reducers: {
-        setChatId: (state, action: PayloadAction<{ chatId: string }>) => {
-            state.value.chatId = action.payload.chatId
+        addMessage: (state, action: PayloadAction<Message>) => {
+            state.value.messages[action.payload.id] = action.payload
+            state.value.messageIds.push(action.payload.id)
         },
-        resetState: () => {
-            return initialState
+        setChatId: (state, action: PayloadAction<{ chatId: string }>) => {
+            state.value = {
+                ...state.value,
+                chatId: action.payload.chatId
+            }
+        },
+        resetState: (state) => {
+            state.value = {
+                ...state.value,
+                messages: {},
+                messageIds: []
+            }
         }
     }
 })
 
 const conversationReducer = conversationSlice.reducer
-export const { resetState, setChatId } = conversationSlice.actions
+export const { resetState, setChatId, addMessage } = conversationSlice.actions
 
 export default conversationReducer
