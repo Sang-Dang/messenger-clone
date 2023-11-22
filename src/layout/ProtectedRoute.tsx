@@ -18,7 +18,7 @@ export default function ProtectedRoute() {
 
     if (loading) {
         // TODO add loading spinner
-        return <div className="grid h-fullNoHeader w-full place-items-center">Loading...</div>
+        return 'Loading...'
     }
 
     if (!user || error) {

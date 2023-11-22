@@ -6,6 +6,6 @@ export function CreateChat(users: string[]) {
     if (users.length < 1) {
         throw new Error('Not enough users to create chat')
     }
-    const chat = new Chat('', '', Timestamp.now(), { message: 'Welcome!', userId: '' }, Timestamp.now(), users)
+    const chat = new Chat('', users.join(', '), Timestamp.now().toDate().toString(), '', Timestamp.now().toDate().toString(), users)
     addDoc(collection(db, 'chats').withConverter(ChatConverter), chat)
 }
