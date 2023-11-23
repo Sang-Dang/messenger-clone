@@ -4,6 +4,8 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { setChatId } from '@/features/Conversation/ConversationSlice'
 import { auth, db } from '@/firebase'
 import useAppDispatch from '@/lib/hooks/useAppDispatch'
+import useAppSelector from '@/lib/hooks/useAppSelector'
+import { cn } from '@/lib/utils'
 import { doc, getDoc } from 'firebase/firestore'
 import { MoreHorizontal } from 'lucide-react'
 import { useEffect, useState } from 'react'
@@ -21,6 +23,7 @@ export default function ChatCard({ chat }: Props) {
         chatName: chat.chatName,
         chatAvatar: chat.avatar
     })
+    const selectedChatCard = useAppSelector((state) => state.conversation.value.chatId)
 
     // auto update chat name and avatar
     useEffect(() => {
@@ -75,7 +78,10 @@ export default function ChatCard({ chat }: Props) {
             </div>
             <div
                 id="chatcard"
-                className="group flex h-[80px] cursor-pointer select-none gap-5 rounded-lg p-[10px] transition-all hover:bg-neutral-200 peer-hover:bg-neutral-200"
+                className={cn(
+                    'group flex h-[80px] cursor-pointer select-none gap-5 rounded-lg p-[10px] transition-all hover:bg-neutral-200 peer-hover:bg-neutral-200',
+                    selectedChatCard === chat.id && 'bg-neutral-200'
+                )}
                 onClick={handleChangeChat}
             >
                 <img src={chatData.chatAvatar} alt="avatar" className="h-[60px] w-[60px] rounded-full" />

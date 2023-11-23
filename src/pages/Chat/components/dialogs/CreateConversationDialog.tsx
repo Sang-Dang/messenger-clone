@@ -20,7 +20,7 @@ import useRefresh from '@/lib/hooks/useRefresh'
 import UserCard from '@/pages/Chat/components/common/UserCard'
 import { DocumentData, QuerySnapshot, collection, doc, documentId, getDocs, or, query, where } from 'firebase/firestore'
 import { X } from 'lucide-react'
-import { ChangeEvent, ReactNode, useRef, useState } from 'react'
+import { ChangeEvent, ReactNode, useEffect, useRef, useState } from 'react'
 import { useAuthState } from 'react-firebase-hooks/auth'
 import { useCollectionOnce } from 'react-firebase-hooks/firestore'
 
@@ -103,7 +103,9 @@ function SelectUserForm({ data, loading, error, onNext, onSubmit, setSelectedUse
     const [searchValue, setSearchValue] = useState('')
     const refresh = useRefresh()
 
-    isUserSelected.add(userId)
+    useEffect(() => {
+        isUserSelected.add(userId)
+    }, [isUserSelected, userId])
 
     function handleSubmit_DualConversation() {
         onSubmit(async () => {
@@ -116,6 +118,12 @@ function SelectUserForm({ data, loading, error, onNext, onSubmit, setSelectedUse
                 or(where('users', '==', [currentUserRef, selectedUserRef]), where('users', '==', [selectedUserRef, currentUserRef]))
             )
             const snapshot = await getDocs(q)
+
+            // // fetch user data
+            // const recipientId = Array.from(isUserSelected).filter((id) => id !== userId)[0]
+            // const recipientRef = doc(db, 'users', recipientId)
+            // const recipientSnapshot = await getDoc(recipientRef)
+            // const recipient = recipientSnapshot.data() as User
 
             // if not, create new conversation
             if (snapshot.empty) {
@@ -327,7 +335,9 @@ function ChatMetadataForm({ selectedUsers, onBack, onSubmit }: ChatMetadataFormP
                 <Button variant="outline" onClick={onBack}>
                     Back
                 </Button>
-                <Button onClick={handleSubmit_GroupConversation}>Create</Button>
+                <Button onClick={handleSubmit_GroupConversation} disabled={!inputChatName.value && !inputAvatar.value}>
+                    Create
+                </Button>
             </DialogFooter>
         </>
     )
