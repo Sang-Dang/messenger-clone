@@ -1,4 +1,5 @@
 import { Toaster } from '@/components/ui'
+import AuthContextProvider from '@/lib/context/AuthContext'
 import { Outlet } from 'react-router-dom'
 
 export default function RootLayout() {
@@ -6,8 +7,10 @@ export default function RootLayout() {
 
     return (
         <>
-            <Toaster />
-            <Outlet />
+            <AuthContextProvider>
+                <Toaster />
+                <Outlet />
+            </AuthContextProvider>
         </>
     )
 }
