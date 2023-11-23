@@ -24,6 +24,7 @@
         "dotenv": "^16.3.1",
         "emoji-picker-react": "^4.5.16",
         "firebase": "^10.6.0",
+        "framer-motion": "^10.16.5",
         "lucide-react": "^0.292.0",
         "path": "^0.12.7",
         "react": "^18.2.0",
