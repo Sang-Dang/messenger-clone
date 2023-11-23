@@ -15,50 +15,116 @@ import {
     ScrollArea,
     toast
 } from '@/components/ui'
-import { db } from '@/firebase'
+import { auth, db } from '@/firebase'
 import useRefresh from '@/lib/hooks/useRefresh'
 import UserCard from '@/pages/Chat/components/common/UserCard'
-import { DocumentData, QuerySnapshot, collection, query } from 'firebase/firestore'
+import { DocumentData, QuerySnapshot, collection, doc, documentId, getDocs, or, query, where } from 'firebase/firestore'
 import { X } from 'lucide-react'
-import { ChangeEvent, Dispatch, ReactNode, SetStateAction, useEffect, useRef, useState } from 'react'
+import { ChangeEvent, ReactNode, useRef, useState } from 'react'
+import { useAuthState } from 'react-firebase-hooks/auth'
 import { useCollectionOnce } from 'react-firebase-hooks/firestore'
 
 type CreateConversationDialogProps = {
     children?: ReactNode
 }
 export default function CreateConversationDialog({ children }: CreateConversationDialogProps) {
+    const [user] = useAuthState(auth)
     const [isDialogOpen, setIsDialogOpen] = useState(false)
-    const [isUserSelected, setIsUserSelected] = useState<Set<string>>(new Set()) // slight prop drilling here because submit is in footer
-    const [value, loading, error] = useCollectionOnce(query(collection(db, 'users')).withConverter(UserConverter))
-    const inputChatName = useState<InputValue<string>>({
-        value: '',
-        error: null
-    })
-    const inputAvatar = useState<InputValue<FileInput>>({
-        value: undefined,
-        error: null
-    })
+    const [value, loading, error] = useCollectionOnce(
+        query(collection(db, 'users'), where(documentId(), '!=', user?.uid)).withConverter(UserConverter)
+    )
     const [step, setStep] = useState<number>(1)
-    const refresh = useRefresh()
-
-    useEffect(() => {
-        setIsUserSelected(new Set()) // sets don't trigger rerender fuck react
-    }, [isDialogOpen])
+    const [selectedUsers, setSelectedUsers] = useState<string[]>([])
 
     function handleCloseDialog(value: boolean) {
         setIsDialogOpen(value)
         setTimeout(() => {
             // wait for dialog to unload first
             setStep(1)
-            inputChatName[1]({
-                value: '',
-                error: null
-            })
-            inputAvatar[1]({
-                value: undefined,
-                error: null
-            })
         }, 500)
+    }
+
+    async function handleSubmitBuilder(dbOperation: () => Promise<number>) {
+        try {
+            const numberUsers = await dbOperation()
+            toast({
+                title: 'Success',
+                description: `New chat created successfully with ${numberUsers} user(s)`
+            })
+            setIsDialogOpen(false)
+        } catch (error) {
+            if (error instanceof Error) {
+                toast({
+                    title: 'Error',
+                    description: error.message,
+                    variant: 'destructive'
+                })
+            }
+            handleCloseDialog(false)
+        }
+    }
+
+    return (
+        <>
+            <Dialog open={isDialogOpen} onOpenChange={handleCloseDialog}>
+                <DialogTrigger asChild>{children}</DialogTrigger>
+                <DialogContent>
+                    <DialogHeader className="font-bold">Start a conversation</DialogHeader>
+                    <DialogDescription className="mb-4">Who do you want to talk to? Please select a user below!</DialogDescription>
+                    {step === 1 && (
+                        <SelectUserForm
+                            data={value!}
+                            loading={loading}
+                            error={error}
+                            onNext={() => setStep(2)}
+                            onSubmit={handleSubmitBuilder}
+                            setSelectedUsers={setSelectedUsers}
+                            userId={user!.uid}
+                        />
+                    )}
+                    {step === 2 && <ChatMetadataForm onBack={() => setStep(1)} onSubmit={handleSubmitBuilder} selectedUsers={selectedUsers} />}
+                </DialogContent>
+            </Dialog>
+        </>
+    )
+}
+
+type SelectUserFormProps = {
+    onNext: () => void
+    onSubmit: (dbOperation: () => Promise<number>) => void
+    setSelectedUsers: (users: string[]) => void
+    data: QuerySnapshot<User, DocumentData>
+    loading: boolean
+    error: Error | undefined
+    userId: string
+}
+function SelectUserForm({ data, loading, error, onNext, onSubmit, setSelectedUsers, userId }: SelectUserFormProps) {
+    const [isUserSelected, setIsUserSelected] = useState<Set<string>>(new Set())
+    const [searchValue, setSearchValue] = useState('')
+    const refresh = useRefresh()
+
+    isUserSelected.add(userId)
+
+    function handleSubmit_DualConversation() {
+        onSubmit(async () => {
+            // check if conversation already exists
+            const values = isUserSelected.values()
+            const currentUserRef = doc(db, 'users', values.next().value)
+            const selectedUserRef = doc(db, 'users', values.next().value)
+            const q = query(
+                collection(db, 'chats'),
+                or(where('users', '==', [currentUserRef, selectedUserRef]), where('users', '==', [selectedUserRef, currentUserRef]))
+            )
+            const snapshot = await getDocs(q)
+
+            // if not, create new conversation
+            if (snapshot.empty) {
+                CreateChat(Array.from(isUserSelected))
+                return isUserSelected.size
+            } else {
+                throw new Error('Conversation already exists')
+            }
+        })
     }
 
     function handleSelect(id: string) {
@@ -71,110 +137,10 @@ export default function CreateConversationDialog({ children }: CreateConversatio
         refresh()
     }
 
-    function handleSubmit() {
-        try {
-            CreateChat(
-                Array.from(isUserSelected),
-                inputChatName[0].value,
-                inputAvatar[0].value ? URL.createObjectURL(inputAvatar[0].value.file!) : ''
-            )
-            toast({
-                title: 'Success',
-                description: `New chat created successfully with ${isUserSelected.size} user(s)`
-            })
-            setIsDialogOpen(false)
-        } catch (error) {
-            if (error instanceof Error) {
-                toast({
-                    title: 'Error',
-                    description: error.message,
-                    variant: 'destructive'
-                })
-            }
-        }
-    }
-
     function handleClearSelection() {
         setIsUserSelected(new Set())
         refresh()
     }
-
-    return (
-        <>
-            <Dialog open={isDialogOpen} onOpenChange={handleCloseDialog}>
-                <DialogTrigger asChild>{children}</DialogTrigger>
-                <DialogContent>
-                    <DialogHeader className="font-bold">Start a conversation</DialogHeader>
-                    <DialogDescription>Who do you want to talk to? Please select a user below!</DialogDescription>
-                    <div className="mt-4">
-                        {step === 1 && (
-                            <SelectUserForm
-                                isUserSelected={isUserSelected}
-                                handleSelect={handleSelect}
-                                data={value!}
-                                loading={loading}
-                                error={error}
-                            />
-                        )}
-                        {step === 2 && <ChatMetadataForm numberPeople={isUserSelected.size} avatar={inputAvatar} chatName={inputChatName} />}
-                    </div>
-                    <DialogFooter>
-                        {step === 1 && (
-                            <>
-                                {isUserSelected.size > 0 ? (
-                                    <Button variant="outline" onClick={handleClearSelection}>
-                                        Clear
-                                    </Button>
-                                ) : (
-                                    <DialogTrigger>
-                                        <Button variant="outline">Cancel</Button>
-                                    </DialogTrigger>
-                                )}
-                                <Button
-                                    onClick={() => {
-                                        if (isUserSelected.size === 0) return
-                                        if (isUserSelected.size === 1) handleSubmit()
-                                        else setStep(2)
-                                    }}
-                                    disabled={isUserSelected.size === 0}
-                                >
-                                    {isUserSelected.size > 0 ? (
-                                        <>
-                                            Start conversation with&nbsp;
-                                            <strong className="font-bold">
-                                                {isUserSelected.size} user{isUserSelected.size > 1 && 's'}
-                                            </strong>
-                                        </>
-                                    ) : (
-                                        <>Please select a user</>
-                                    )}
-                                </Button>
-                            </>
-                        )}
-                        {step === 2 && (
-                            <>
-                                <Button variant="outline" onClick={() => setStep(1)}>
-                                    Back
-                                </Button>
-                                <Button onClick={handleSubmit}>Create</Button>
-                            </>
-                        )}
-                    </DialogFooter>
-                </DialogContent>
-            </Dialog>
-        </>
-    )
-}
-
-type SelectUserFormProps = {
-    isUserSelected: Set<string>
-    handleSelect: (id: string) => void
-    data: QuerySnapshot<User, DocumentData>
-    loading: boolean
-    error: Error | undefined
-}
-function SelectUserForm({ isUserSelected, handleSelect, data, loading, error }: SelectUserFormProps) {
-    const [searchValue, setSearchValue] = useState('')
 
     if (loading) {
         return <div>Loading...</div>
@@ -207,19 +173,65 @@ function SelectUserForm({ isUserSelected, handleSelect, data, loading, error }: 
                         <UserCard key={doc.id} doc={doc} isUserSelected={isUserSelected} handleSelect={handleSelect} searchTerm={searchValue} />
                     ))}
             </ScrollArea>
+            <DialogFooter>
+                {isUserSelected.size > 1 ? (
+                    <Button variant="outline" onClick={handleClearSelection}>
+                        Clear
+                    </Button>
+                ) : (
+                    <DialogTrigger>
+                        <Button variant="outline">Cancel</Button>
+                    </DialogTrigger>
+                )}
+                <Button
+                    onClick={() => {
+                        if (isUserSelected.size < 2) return
+                        if (isUserSelected.size === 2) handleSubmit_DualConversation()
+                        else {
+                            setSelectedUsers(Array.from(isUserSelected))
+                            onNext()
+                        }
+                    }}
+                    disabled={isUserSelected.size <= 1}
+                >
+                    {isUserSelected.size > 1 ? (
+                        <>
+                            Start conversation with&nbsp;
+                            <strong className="font-bold">
+                                {isUserSelected.size} user{isUserSelected.size > 1 && 's'}
+                            </strong>
+                        </>
+                    ) : (
+                        <>Please select a user</>
+                    )}
+                </Button>
+            </DialogFooter>
         </>
     )
 }
 
 type ChatMetadataFormProps = {
-    numberPeople: number
-    chatName: [InputValue<string>, Dispatch<SetStateAction<InputValue<string>>>]
-    avatar: [InputValue<FileInput>, Dispatch<SetStateAction<InputValue<FileInput>>>]
+    onBack: () => void
+    onSubmit: (dbOperation: () => Promise<number>) => void
+    selectedUsers: string[]
 }
-function ChatMetadataForm({ numberPeople, chatName, avatar }: ChatMetadataFormProps) {
-    const [inputChatName, setInputChatName] = chatName
-    const [inputAvatar, setInputAvatar] = avatar
+function ChatMetadataForm({ selectedUsers, onBack, onSubmit }: ChatMetadataFormProps) {
+    const [inputChatName, setInputChatName] = useState<InputValue<string>>({
+        value: '',
+        error: null
+    })
+    const [inputAvatar, setInputAvatar] = useState<InputValue<FileInput>>({
+        value: undefined,
+        error: null
+    })
     const fileInputRef = useRef<HTMLInputElement>(null)
+
+    function handleSubmit_GroupConversation() {
+        onSubmit(async () => {
+            CreateChat(selectedUsers, inputChatName.value, inputAvatar.value ? URL.createObjectURL(inputAvatar.value.file!) : '')
+            return selectedUsers.length
+        })
+    }
 
     function handleChange_ChatName(e: ChangeEvent<HTMLInputElement>) {
         const value = e.target.value
@@ -279,7 +291,7 @@ function ChatMetadataForm({ numberPeople, chatName, avatar }: ChatMetadataFormPr
                 </Avatar>
                 <div className="flex flex-col items-start justify-center">
                     <h5 className="text-lg font-bold">{inputChatName.value ? inputChatName.value : 'Name of your group chat'}</h5>
-                    <span className="text-sm font-light">{numberPeople + 1} people</span>
+                    <span className="text-sm font-light">{selectedUsers.length} people</span>
                 </div>
             </div>
             <div className="mb-3">
@@ -311,6 +323,12 @@ function ChatMetadataForm({ numberPeople, chatName, avatar }: ChatMetadataFormPr
                 <Input id="input_avatar" type="file" accept="image/*" onChange={handleChange_Avatar} className="cursor-pointer" ref={fileInputRef} />
                 <div className="mt-1 block h-5 text-sm text-red-500">{inputAvatar.error}</div>
             </div>
+            <DialogFooter>
+                <Button variant="outline" onClick={onBack}>
+                    Back
+                </Button>
+                <Button onClick={handleSubmit_GroupConversation}>Create</Button>
+            </DialogFooter>
         </>
     )
 }
