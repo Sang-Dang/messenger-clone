@@ -1,12 +1,12 @@
 import chatReducer from '@/features/Chat/ChatSlice'
 import conversationReducer from '@/features/Conversation/ConversationSlice'
-import loadingSplashReducer from '@/features/LoadingSplash/LoadingSplashSlice'
+import usersReducer from '@/features/Users/UsersSlice'
 import { combineReducers, configureStore } from '@reduxjs/toolkit'
 
 const rootReducer = combineReducers({
     chat: chatReducer,
     conversation: conversationReducer,
-    loadingSplash: loadingSplashReducer
+    users: usersReducer
 })
 
 export const store = configureStore({

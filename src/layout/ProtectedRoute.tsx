@@ -8,7 +8,9 @@ export default function ProtectedRoute() {
     const [user, loading, error] = useAuthState(auth)
 
     function goBack() {
-        navigate(-1)
+        navigate('/', {
+            replace: true
+        })
         toast({
             title: 'Error',
             description: 'You need to be logged in to access this page.',

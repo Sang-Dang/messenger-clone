@@ -5,6 +5,7 @@ import ChatHeader from '@/pages/Chat/components/common/ChatHeader'
 import MessageInputBox from '@/pages/Chat/components/common/MessageInputBox'
 import MessagesViewContainer from '@/pages/Chat/components/common/MessagesViewContainer'
 import { doc } from 'firebase/firestore'
+import { MessagesSquare } from 'lucide-react'
 import { useAuthState } from 'react-firebase-hooks/auth'
 import { useDocumentOnce } from 'react-firebase-hooks/firestore'
 
@@ -12,7 +13,15 @@ export default function ConversationView() {
     const chatId = useAppSelector((state) => state.conversation.value.chatId)
 
     if (!chatId) {
-        return <div>Please select a chat.</div>
+        return (
+            <div className="flex h-full w-full flex-col items-center justify-center">
+                <div className="rounded-lg bg-neutral-100 p-20 text-center shadow-sm transition-all hover:shadow-lg">
+                    <MessagesSquare size={100} className="mx-auto" />
+                    <h5 className="mt-5 text-2xl font-bold">No chats selected</h5>
+                    <p className="mt-2 text-sm font-normal">Please select a chat to start the conversation!</p>
+                </div>
+            </div>
+        )
     }
 
     return <ConversationViewData key={chatId} chatId={chatId} />

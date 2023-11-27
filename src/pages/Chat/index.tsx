@@ -6,7 +6,7 @@ import CreateConversationDialog from '@/pages/Chat/components/dialogs/CreateConv
 export default function ChatPage() {
     return (
         <div className="flex h-fullNoHeader items-center">
-            <aside className="h-full w-3/12 bg-secondary shadow-2xl">
+            <aside className="h-full w-3/12 rounded-r-lg border-r-2 border-r-neutral-200 bg-secondary shadow-2xl">
                 <div className="p-8">
                     <CreateConversationDialog>
                         <Button className="w-full">Create Conversation</Button>

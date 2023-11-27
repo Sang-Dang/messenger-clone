@@ -8,21 +8,18 @@ import {
     DropdownMenuItem,
     DropdownMenuLabel,
     DropdownMenuSeparator,
-    DropdownMenuTrigger
+    DropdownMenuTrigger,
+    Skeleton
 } from '@/components/ui'
 import { auth } from '@/firebase'
-import { GoogleAuthProvider, signInWithPopup } from 'firebase/auth'
+import LoginDialog from '@/layout/Base/LoginDialog'
+
 import { useAuthState } from 'react-firebase-hooks/auth'
 import { useNavigate } from 'react-router-dom'
 
 const Navbar = () => {
-    const [user] = useAuthState(auth)
+    const [user, loading] = useAuthState(auth)
     const navigate = useNavigate()
-
-    function handleSignin() {
-        const provider = new GoogleAuthProvider()
-        signInWithPopup(auth, provider)
-    }
 
     function handleSignout() {
         auth.signOut()
@@ -42,7 +39,9 @@ const Navbar = () => {
                     My Profile
                 </Button>
             </nav>
-            {user ? (
+            {loading ? (
+                <Skeleton className="h-10 w-10 rounded-full" />
+            ) : user ? (
                 <DropdownMenu>
                     <DropdownMenuTrigger>
                         <Avatar>
@@ -60,7 +59,9 @@ const Navbar = () => {
                     </DropdownMenuContent>
                 </DropdownMenu>
             ) : (
-                <Button onClick={handleSignin}>Sign In</Button>
+                <LoginDialog>
+                    <Button>Sign In</Button>
+                </LoginDialog>
             )}
         </div>
     )
