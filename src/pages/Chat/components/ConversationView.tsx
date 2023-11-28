@@ -1,12 +1,11 @@
 import { ChatConverter } from '@/classes/Chat'
-import { auth, db } from '@/firebase'
+import { db } from '@/firebase'
 import useAppSelector from '@/lib/hooks/useAppSelector'
 import ChatHeader from '@/pages/Chat/components/common/ChatHeader'
 import MessageInputBox from '@/pages/Chat/components/common/MessageInputBox'
 import MessagesViewContainer from '@/pages/Chat/components/common/MessagesViewContainer'
 import { doc } from 'firebase/firestore'
 import { MessagesSquare } from 'lucide-react'
-import { useAuthState } from 'react-firebase-hooks/auth'
 import { useDocumentOnce } from 'react-firebase-hooks/firestore'
 
 export default function ConversationView() {
@@ -31,10 +30,9 @@ type ConversationViewDataType = {
     chatId: string
 }
 function ConversationViewData({ chatId }: ConversationViewDataType) {
-    const [user] = useAuthState(auth)
     const [chat, loadingChat, errorChat] = useDocumentOnce(doc(db, 'chats', chatId).withConverter(ChatConverter))
 
-    if (loadingChat) {
+    if (loadingChat || !chat) {
         return <div>Loading...</div>
     }
 
@@ -44,9 +42,9 @@ function ConversationViewData({ chatId }: ConversationViewDataType) {
 
     return (
         <div className="flex h-full flex-col">
-            <ChatHeader chat={chat?.data()} loading={loadingChat} error={errorChat} userId={user?.uid} />
-            <MessagesViewContainer className="flex-grow" chatId={chatId} userIds={chat!.data()?.users} />
-            <MessageInputBox chatId={chatId} />
+            <ChatHeader chat={chat.data()!} className="h-header" />
+            <MessagesViewContainer chatId={chatId} userIds={chat.data()!.users} />
+            <MessageInputBox chatId={chatId} className="h-header" />
         </div>
     )
 }

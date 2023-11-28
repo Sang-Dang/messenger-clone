@@ -1,16 +1,22 @@
-import { User } from '@/classes/User'
-import { PayloadAction, createSlice } from '@reduxjs/toolkit'
+import { User, UserConverter } from '@/classes/User'
+import { db } from '@/firebase'
+import { PayloadAction, createAsyncThunk, createSlice } from '@reduxjs/toolkit'
+import { collection, documentId, getDocs, query, where } from 'firebase/firestore'
 
 type UsersSliceType = {
     users: {
         [key: string]: User
     }
     userIds: string[]
+    status: 'idle' | 'loading' | 'failed'
+    error: string | null
 }
 
 const initialState: UsersSliceType = {
     users: {},
-    userIds: []
+    userIds: [],
+    status: 'idle',
+    error: null
 }
 
 export const UsersSlice = createSlice({
@@ -40,7 +46,37 @@ export const UsersSlice = createSlice({
                 }
             })
         }
+    },
+    extraReducers: (builder) => {
+        builder
+            .addCase(fetchUsers.pending, (state) => {
+                state.status = 'loading'
+            })
+            .addCase(fetchUsers.fulfilled, (state, action) => {
+                state.status = 'idle'
+                action.payload
+            })
+            .addCase(fetchUsers.rejected, (state, action) => {
+                state.status = 'failed'
+                state.error = action.error.message ?? null
+            })
     }
+})
+
+export const fetchUsers = createAsyncThunk('users/fetchUsers', async (userIds: string[], api) => {
+    if (userIds.length === 0) {
+        return
+    }
+
+    const q = query(collection(db, 'users').withConverter(UserConverter), where(documentId(), 'in', userIds))
+    const documents = await getDocs(q)
+    api.dispatch(
+        manyUsersAdded(
+            documents.docs.map((doc) => ({
+                ...doc.data()
+            }))
+        )
+    )
 })
 
 const usersReducer = UsersSlice.reducer

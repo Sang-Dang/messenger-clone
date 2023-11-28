@@ -1,55 +1,39 @@
 import { Chat } from '@/classes/Chat'
-import { UserConverter } from '@/classes/User'
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui'
+import { Avatar, AvatarFallback, AvatarImage, DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui'
 import { setChatId } from '@/features/Conversation/ConversationSlice'
-import { auth, db } from '@/firebase'
 import useAppDispatch from '@/lib/hooks/useAppDispatch'
 import useAppSelector from '@/lib/hooks/useAppSelector'
+import useAuth from '@/lib/hooks/useAuth'
 import { cn } from '@/lib/utils'
-import { doc, getDoc } from 'firebase/firestore'
 import { MoreHorizontal } from 'lucide-react'
-import { useEffect, useState } from 'react'
-import { useAuthState } from 'react-firebase-hooks/auth'
 
 type Props = {
     chat: Chat
 }
 
 export default function ChatCard({ chat }: Props) {
+    const { user } = useAuth()
+    const status = useAppSelector((state) => state.users.status)
+    const recipient = useAppSelector((state) => state.users.users[chat.users.filter((cur) => cur !== user.uid)[0]]) // select first person besides self
+
+    if (status === 'loading') {
+        return <div>Loading...</div>
+    }
+
+    if (chat.users.length <= 2 && recipient) {
+        chat.avatar = recipient.avatar
+        chat.chatName = recipient.name
+    }
+
+    return <ChatCardView chat={chat} />
+}
+
+type ChatCardViewProps = {
+    chat: Chat
+}
+function ChatCardView({ chat }: ChatCardViewProps) {
     const dispatch = useAppDispatch()
-    const isGroupChat = chat.users.length > 2
-    const [user] = useAuthState(auth)
-    const [chatData, setChatData] = useState({
-        chatName: chat.chatName,
-        chatAvatar: chat.avatar
-    })
     const selectedChatCard = useAppSelector((state) => state.conversation.value.chatId)
-
-    // auto update chat name and avatar
-    useEffect(() => {
-        setChatData({
-            chatName: chat.chatName,
-            chatAvatar: chat.avatar
-        })
-    }, [chat.avatar, chat.chatName])
-
-    useEffect(() => {
-        async function getRecipient(id: string) {
-            const q = doc(db, 'users', id).withConverter(UserConverter)
-            const snapshot = await getDoc(q)
-            setChatData((prev) => ({
-                ...prev,
-                chatName: snapshot.data()!.name,
-                chatAvatar: snapshot.data()!.avatar
-            }))
-        }
-
-        if (!isGroupChat) {
-            const otherUser = chat.users.find((curr) => curr !== user?.uid)! // cannot be undefined
-            getRecipient(otherUser)
-        }
-    }, [chat.users, isGroupChat, user?.uid])
-
     function handleChangeChat() {
         dispatch(
             setChatId({
@@ -57,7 +41,6 @@ export default function ChatCard({ chat }: Props) {
             })
         )
     }
-
     return (
         <div className="group relative">
             <div className="peer pointer-events-none invisible absolute right-5 top-1/2 -translate-y-1/2 opacity-0 transition-all group-hover:pointer-events-auto group-hover:visible group-hover:opacity-100">
@@ -84,9 +67,12 @@ export default function ChatCard({ chat }: Props) {
                 )}
                 onClick={handleChangeChat}
             >
-                <img src={chatData.chatAvatar} alt="avatar" className="h-[60px] w-[60px] rounded-full" />
+                <Avatar className="h-[60px] w-[60px] rounded-full">
+                    <AvatarImage src={chat.avatar} alt="avatar" className="h-[60px] w-[60px]" />
+                    <AvatarFallback className="h-[60px] w-[60px] text-neutral-900 ">{chat.chatName[0]}</AvatarFallback>
+                </Avatar>
                 <div className="flex flex-col items-start justify-center">
-                    <h5 className="text-lg font-semibold">{chatData.chatName}</h5>
+                    <h5 className="text-lg font-semibold">{chat.chatName}</h5>
                     <p>{chat.lastMessage ? chat.lastMessage : 'There are no messages.'}</p>
                 </div>
             </div>
