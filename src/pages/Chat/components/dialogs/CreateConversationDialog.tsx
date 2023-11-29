@@ -119,12 +119,6 @@ function SelectUserForm({ data, loading, error, onNext, onSubmit, setSelectedUse
             )
             const snapshot = await getDocs(q)
 
-            // // fetch user data
-            // const recipientId = Array.from(isUserSelected).filter((id) => id !== userId)[0]
-            // const recipientRef = doc(db, 'users', recipientId)
-            // const recipientSnapshot = await getDoc(recipientRef)
-            // const recipient = recipientSnapshot.data() as User
-
             // if not, create new conversation
             if (snapshot.empty) {
                 CreateChat(Array.from(isUserSelected))
