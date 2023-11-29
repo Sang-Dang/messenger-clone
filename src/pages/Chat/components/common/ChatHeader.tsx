@@ -5,6 +5,7 @@ import useAuth from '@/lib/hooks/useAuth'
 import { cn } from '@/lib/utils'
 import { formatDistance } from 'date-fns'
 import { memo, useMemo } from 'react'
+import { Helmet } from 'react-helmet'
 
 type ChatHeaderProps = {
     chat: Chat
@@ -59,19 +60,24 @@ type ChatHeaderViewProps = {
 }
 const ChatHeaderView = memo(({ avatar, chatName, recipientActivity, className }: ChatHeaderViewProps) => {
     return (
-        <header className={cn('flex w-full items-center gap-5 bg-neutral-200/70 px-[30px] py-[10px]', className)}>
-            <Avatar className="h-[45px] w-[45px]">
-                <AvatarImage src={avatar} alt="avatar" />
-                <AvatarFallback>{chatName.slice(0, 2)}</AvatarFallback>
-            </Avatar>
-            <div>
-                <h1 className="text-xl font-semibold">{chatName}</h1>
-                <p className="text-xs font-light">
-                    {Number(recipientActivity[0]) < 2 && recipientActivity[1] === 'minutes'
-                        ? 'Active'
-                        : 'Active ' + recipientActivity.join(' ') + ' ago'}
-                </p>
-            </div>
-        </header>
+        <>
+            <Helmet>
+                <title>{chatName} | Chunt</title>
+            </Helmet>
+            <header className={cn('flex w-full items-center gap-5 bg-neutral-200/70 px-[30px] py-[10px]', className)}>
+                <Avatar className="h-[45px] w-[45px]">
+                    <AvatarImage src={avatar} alt="avatar" />
+                    <AvatarFallback>{chatName.slice(0, 2)}</AvatarFallback>
+                </Avatar>
+                <div>
+                    <h1 className="text-xl font-semibold">{chatName}</h1>
+                    <p className="text-xs font-light">
+                        {Number(recipientActivity[0]) < 2 && recipientActivity[1] === 'minutes'
+                            ? 'Active'
+                            : 'Active ' + recipientActivity.join(' ') + ' ago'}
+                    </p>
+                </div>
+            </header>
+        </>
     )
 })

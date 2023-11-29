@@ -1,0 +1,33 @@
+{
+  "indexes": [
+    {
+      "collectionGroup": "chats",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "users",
+          "arrayConfig": "CONTAINS"
+        },
+        {
+          "fieldPath": "lastUpdatedOn",
+          "order": "ASCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "chats",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "users",
+          "arrayConfig": "CONTAINS"
+        },
+        {
+          "fieldPath": "lastUpdatedOn",
+          "order": "DESCENDING"
+        }
+      ]
+    }
+  ],
+  "fieldOverrides": []
+}
