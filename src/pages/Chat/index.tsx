@@ -10,7 +10,7 @@ export default function ChatPage() {
             <Helmet>
                 <title>Chat | Chunt</title>
             </Helmet>
-            <div className="flex h-fullNoHeader items-center">
+            <div className="flex h-fullNoHeader items-center overflow-x-hidden">
                 <aside className="h-full w-3/12 rounded-r-lg border-r-2 border-r-neutral-200 bg-secondary shadow-2xl">
                     <div className="p-8">
                         <CreateConversationDialog>

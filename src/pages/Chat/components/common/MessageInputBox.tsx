@@ -5,13 +5,15 @@ import { cn } from '@/lib/utils'
 import { Send } from 'lucide-react'
 import { useCallback, useEffect, useState } from 'react'
 import { useAuthState } from 'react-firebase-hooks/auth'
+import { AnimatePresence, motion } from 'framer-motion'
+
+const MotionButton = motion(Button)
 
 type MessageInputBoxType = {
     chatId: string
     className?: string
 }
 export default function MessageInputBox({ chatId, className }: MessageInputBoxType) {
-    console.log('RENDER')
     const [user] = useAuthState(auth)
     const [messageInput, setMessageInput] = useState('')
     const [isFocused, setIsFocused] = useState(false)
@@ -40,16 +42,36 @@ export default function MessageInputBox({ chatId, className }: MessageInputBoxTy
     return (
         <div className={cn('flex gap-3 p-3', className)}>
             <Input
-                className="flex-grow rounded-full bg-neutral-200/70 focus-visible:ring-0"
+                className={cn('w-full rounded-full bg-neutral-200/70 focus-visible:ring-0')}
                 placeholder="Aa"
                 value={messageInput}
                 onChange={(e) => setMessageInput(e.target.value)}
                 onFocus={() => setIsFocused(true)}
                 onBlur={() => setIsFocused(false)}
             />
-            <Button className="grid place-items-center rounded-full p-3" variant="default" onClick={handleSubmit}>
-                <Send size={16} />
-            </Button>
+            <AnimatePresence mode="popLayout">
+                {isFocused && (
+                    <MotionButton
+                        initial={{
+                            y: 100,
+                            opacity: 0
+                        }}
+                        animate={{
+                            y: 0,
+                            opacity: 1
+                        }}
+                        exit={{
+                            y: 100,
+                            opacity: 0
+                        }}
+                        className="grid place-items-center rounded-full p-3"
+                        variant="default"
+                        onClick={handleSubmit}
+                    >
+                        <Send size={16} />
+                    </MotionButton>
+                )}
+            </AnimatePresence>
         </div>
     )
 }

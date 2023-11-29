@@ -1,10 +1,13 @@
-import ProtectedRoute from '@/layout/ProtectedRoute'
-import BaseLayout from '@/layout/Base'
-import RootLayout from '@/layout/Root'
-import Home from '@/pages/Home'
-import Test from '@/pages/Test'
+/* eslint-disable react-refresh/only-export-components */
 import { Route, createBrowserRouter, createRoutesFromElements } from 'react-router-dom'
-import ChatPage from '@/pages/Chat'
+import { lazy } from 'react'
+
+const BaseLayout = lazy(() => import('@/layout/Base'))
+const RootLayout = lazy(() => import('@/layout/Root'))
+const ProtectedRoute = lazy(() => import('@/layout/ProtectedRoute'))
+const Home = lazy(() => import('@/pages/Home'))
+const Test = lazy(() => import('@/pages/Test'))
+const ChatPage = lazy(() => import('@/pages/Chat'))
 
 const routes = createBrowserRouter(
     createRoutesFromElements(
