@@ -1,13 +1,11 @@
 import { CreateMessage } from '@/api/messages'
+import EmojiSelector from '@/components/EmojiSelector'
 import { Button, Input } from '@/components/ui'
 import { auth } from '@/firebase'
 import { cn } from '@/lib/utils'
-import { Send } from 'lucide-react'
+import { Send, Smile } from 'lucide-react'
 import { useCallback, useEffect, useState } from 'react'
 import { useAuthState } from 'react-firebase-hooks/auth'
-import { AnimatePresence, motion } from 'framer-motion'
-
-const MotionButton = motion(Button)
 
 type MessageInputBoxType = {
     chatId: string
@@ -40,38 +38,25 @@ export default function MessageInputBox({ chatId, className }: MessageInputBoxTy
     }, [handleSubmit, isFocused])
 
     return (
-        <div className={cn('flex gap-3 p-3', className)}>
-            <Input
-                className={cn('w-full rounded-full bg-neutral-200/70 focus-visible:ring-0')}
-                placeholder="Aa"
-                value={messageInput}
-                onChange={(e) => setMessageInput(e.target.value)}
-                onFocus={() => setIsFocused(true)}
-                onBlur={() => setIsFocused(false)}
-            />
-            <AnimatePresence mode="popLayout">
-                {isFocused && (
-                    <MotionButton
-                        initial={{
-                            y: 100,
-                            opacity: 0
-                        }}
-                        animate={{
-                            y: 0,
-                            opacity: 1
-                        }}
-                        exit={{
-                            y: 100,
-                            opacity: 0
-                        }}
-                        className="grid place-items-center rounded-full p-3"
-                        variant="default"
-                        onClick={handleSubmit}
-                    >
-                        <Send size={16} />
-                    </MotionButton>
-                )}
-            </AnimatePresence>
+        <div className={cn('flex gap-3 p-3', className)} onFocus={() => setIsFocused(true)} onBlur={() => setIsFocused(false)}>
+            <div className="relative w-full">
+                <Input
+                    className={cn('relative z-0 rounded-full bg-neutral-200/70 focus-visible:ring-0')}
+                    placeholder="Aa"
+                    value={messageInput}
+                    onChange={(e) => setMessageInput(e.target.value)}
+                />
+                <div className="absolute right-0 top-1/2 z-20 -translate-y-1/2">
+                    <EmojiSelector onSelect={(e) => setMessageInput((prev) => prev + e)}>
+                        <Button variant="ghost" className="rounded-full p-3">
+                            <Smile size={20} />
+                        </Button>
+                    </EmojiSelector>
+                </div>
+            </div>
+            <Button className="grid place-items-center rounded-full p-3" variant="default" onClick={handleSubmit}>
+                <Send size={16} />
+            </Button>
         </div>
     )
 }

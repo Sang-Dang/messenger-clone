@@ -1,12 +1,15 @@
 import { MessageConverter } from '@/classes/Message'
+import { Separator } from '@/components/ui'
 import { selectUserInIdList } from '@/features/Users/UsersSelectors'
 import { db } from '@/firebase'
 import useAppSelector from '@/lib/hooks/useAppSelector'
 import { cn } from '@/lib/utils'
 import MessageBubble from '@/pages/Chat/components/common/MessageBubble'
+import differenceInMinutes from 'date-fns/differenceInMinutes'
+import format from 'date-fns/format'
 import { collection, orderBy, query } from 'firebase/firestore'
 import { MessageSquare } from 'lucide-react'
-import { useEffect, useRef } from 'react'
+import { Fragment, useEffect, useRef } from 'react'
 import { useCollectionData } from 'react-firebase-hooks/firestore'
 
 type MessagesViewContainerProps = {
@@ -48,14 +51,24 @@ export default function MessagesViewContainer({ className, chatId, userIds }: Me
                     <p className="mt-1 font-light">Type your first message in the input box below.</p>
                 </div>
             ) : (
-                <div className="overflow-y-auto px-3" ref={scrollRef}>
+                <div className="overflow-y-auto px-3 pt-5" ref={scrollRef}>
                     {messages!.map((data, index, array) => (
-                        <MessageBubble
-                            data={data}
-                            showAvatar={array[index + 1] === undefined || array[index + 1].userId !== data.userId}
-                            key={data.id}
-                            sender={users.filter((user) => user.id === data.userId)[0]}
-                        />
+                        <Fragment key={data.id}>
+                            {differenceInMinutes(new Date(data.createdOn), new Date(array[index - 1]?.createdOn)) > 10 && (
+                                <div className="relative mx-auto my-10">
+                                    <Separator className="w-full bg-primary/40" />
+                                    <p className="absolute left-1/2 w-max -translate-x-1/2 -translate-y-1/2 bg-white px-3 text-primary/70">
+                                        {format(new Date(data.createdOn), 'dd/MM/yyyy - HH:mm')}
+                                    </p>
+                                </div>
+                            )}
+                            <MessageBubble
+                                data={data}
+                                showAvatar={array[index + 1] === undefined || array[index + 1].userId !== data.userId}
+                                key={data.id}
+                                sender={users.filter((user) => user.id === data.userId)[0]}
+                            />
+                        </Fragment>
                     ))}
                 </div>
             )}

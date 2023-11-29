@@ -13,6 +13,11 @@ export default function MessageBubble({ data, sender, showAvatar = true }: Props
     const { user } = useAuth()
     const isMe = sender.id === user.uid
     const isAvatarShown = showAvatar && !isMe
+    const hasOnlyEmojis = onlyEmojis(data.message)
+
+    function onlyEmojis(string: string) {
+        return [...string].every((char) => /[\p{Emoji}]/u.test(char))
+    }
 
     return (
         <div className={cn('flex items-center gap-3', isMe && 'flex-row-reverse', !isAvatarShown && 'mb-[2px]', isAvatarShown && 'mb-3')}>
@@ -24,9 +29,11 @@ export default function MessageBubble({ data, sender, showAvatar = true }: Props
             )}
             <div
                 className={cn(
-                    'inline-flex w-max items-center rounded-lg bg-blue-500 p-3 font-[500] text-white',
+                    'inline-flex w-max items-center rounded-lg p-3 font-[500] text-white',
                     !isAvatarShown && 'ml-[52px]',
-                    isMe && 'mr-[10px]'
+                    isMe && 'mr-[10px]',
+                    !hasOnlyEmojis && 'bg-blue-500',
+                    hasOnlyEmojis && 'text-5xl'
                 )}
             >
                 {data.message}

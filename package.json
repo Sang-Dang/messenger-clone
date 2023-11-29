@@ -10,6 +10,8 @@
         "preview": "vite preview"
     },
     "dependencies": {
+        "@emoji-mart/data": "^1.1.2",
+        "@emoji-mart/react": "^1.1.1",
         "@radix-ui/react-avatar": "^1.0.4",
         "@radix-ui/react-dialog": "^1.0.5",
         "@radix-ui/react-dropdown-menu": "^2.0.6",
@@ -25,7 +27,8 @@
         "class-variance-authority": "^0.7.0",
         "date-fns": "^2.30.0",
         "dotenv": "^16.3.1",
-        "emoji-picker-react": "^4.5.16",
+        "emoji-mart": "^5.5.2",
+        "emoji-regex": "^10.3.0",
         "firebase": "^10.6.0",
         "framer-motion": "^10.16.5",
         "lucide-react": "^0.292.0",
