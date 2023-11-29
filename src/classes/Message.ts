@@ -1,4 +1,4 @@
-import { QueryDocumentSnapshot, SnapshotOptions, Timestamp } from 'firebase/firestore'
+import { FirestoreDataConverter, QueryDocumentSnapshot, SnapshotOptions, Timestamp } from 'firebase/firestore'
 
 export class Message {
     id: string
@@ -14,7 +14,7 @@ export class Message {
     }
 }
 
-export const MessageConverter = {
+export const MessageConverter: FirestoreDataConverter<Message> = {
     toFirestore: (message: Message) => {
         return {
             userId: message.userId,

@@ -1,4 +1,5 @@
 // Import the functions you need from the SDKs you need
+import { User, UserConverter } from '@/classes/User'
 import { getAnalytics } from 'firebase/analytics'
 import { initializeApp } from 'firebase/app'
 import { getAuth } from 'firebase/auth'
@@ -26,11 +27,16 @@ export const db = getFirestore(app)
 auth.onAuthStateChanged(function (user) {
     // update avatar for every logind
     if (user) {
-        const docRef = doc(db, 'users', user.uid)
-        setDoc(docRef, {
-            avatar: user.photoURL,
-            name: user.displayName,
-            email: user.email
-        })
+        const docRef = doc(db, 'users', user.uid).withConverter(UserConverter)
+        setDoc(
+            docRef,
+            new User(
+                user.uid,
+                user.displayName ?? '',
+                user.email ?? '',
+                user.metadata.lastSignInTime ?? new Date().toString(),
+                user.photoURL ?? undefined
+            )
+        )
     }
 })

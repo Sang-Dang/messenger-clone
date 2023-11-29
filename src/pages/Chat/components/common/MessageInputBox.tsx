@@ -11,6 +11,7 @@ type MessageInputBoxType = {
     className?: string
 }
 export default function MessageInputBox({ chatId, className }: MessageInputBoxType) {
+    console.log('RENDER')
     const [user] = useAuthState(auth)
     const [messageInput, setMessageInput] = useState('')
     const [isFocused, setIsFocused] = useState(false)

@@ -10,15 +10,18 @@ type Props = {
 export default function LoginDialog({ children }: Props) {
     const [open, setOpen] = useState(false)
 
-    function handleSigninGoogle() {
+    async function handleSigninGoogle() {
         const provider = new GoogleAuthProvider()
-        signInWithPopup(auth, provider)
+        provider.setCustomParameters({
+            prompt: 'select_account'
+        })
+        await signInWithPopup(auth, provider)
         setOpen(false)
     }
 
-    function handleSigninMicrosoft() {
+    async function handleSigninMicrosoft() {
         const provider = new OAuthProvider('microsoft.com')
-        signInWithPopup(auth, provider)
+        await signInWithPopup(auth, provider)
         setOpen(false)
     }
 

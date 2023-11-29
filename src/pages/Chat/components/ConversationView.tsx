@@ -40,10 +40,12 @@ function ConversationViewData({ chatId }: ConversationViewDataType) {
         return <div>Error: {errorChat.message}</div>
     }
 
+    const chatData = chat.data()!
+
     return (
         <div className="flex h-full flex-col">
-            <ChatHeader chat={chat.data()!} className="h-header" />
-            <MessagesViewContainer chatId={chatId} userIds={chat.data()!.users} />
+            <ChatHeader chat={chatData} className="h-header" />
+            <MessagesViewContainer chatId={chatId} userIds={chat.data()?.users ?? []} />
             <MessageInputBox chatId={chatId} className="h-header" />
         </div>
     )

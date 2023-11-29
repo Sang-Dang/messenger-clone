@@ -1,4 +1,5 @@
 import { MessageConverter } from '@/classes/Message'
+import { selectUserInIdList } from '@/features/Users/UsersSelectors'
 import { db } from '@/firebase'
 import useAppSelector from '@/lib/hooks/useAppSelector'
 import { cn } from '@/lib/utils'
@@ -29,11 +30,8 @@ export default function MessagesViewContainer({ className, chatId, userIds }: Me
     }, [messages])
 
     // get all users in current conversation
-    const users = useAppSelector((state) => {
-        return Object.entries(state.users.users)
-            .filter(([key]) => userIds.includes(key))
-            .map(([, value]) => value)
-    })
+
+    const users = useAppSelector(selectUserInIdList(userIds))
 
     if (errorMessages) {
         return <div>Error: {errorMessages.message}</div>

@@ -15,9 +15,9 @@ export default function MessageBubble({ data, sender, showAvatar = true }: Props
     const isAvatarShown = showAvatar && !isMe
 
     return (
-        <div className={cn('flex min-h-[30px] gap-3', isMe && 'flex-row-reverse', !isAvatarShown && 'mb-[2px]')}>
+        <div className={cn('flex items-center gap-3', isMe && 'flex-row-reverse', !isAvatarShown && 'mb-[2px]', isAvatarShown && 'mb-3')}>
             {isAvatarShown && (
-                <Avatar className="aspect-square h-full w-[50px]">
+                <Avatar className="aspect-square h-full w-[40px]">
                     <AvatarImage src={sender.avatar} alt="avatar" className="h-full w-full" />
                     <AvatarFallback>{sender.name}</AvatarFallback>
                 </Avatar>
@@ -25,7 +25,7 @@ export default function MessageBubble({ data, sender, showAvatar = true }: Props
             <div
                 className={cn(
                     'inline-flex w-max items-center rounded-lg bg-blue-500 p-3 font-[500] text-white',
-                    !isAvatarShown && 'ml-[62px]',
+                    !isAvatarShown && 'ml-[52px]',
                     isMe && 'mr-[10px]'
                 )}
             >
