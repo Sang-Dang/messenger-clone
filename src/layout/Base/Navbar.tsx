@@ -1,3 +1,4 @@
+import TitleCard from '@/components/TitleCard'
 import {
     Avatar,
     AvatarFallback,
@@ -9,35 +10,68 @@ import {
     DropdownMenuLabel,
     DropdownMenuSeparator,
     DropdownMenuTrigger,
-    Skeleton
+    Skeleton,
+    Tooltip,
+    TooltipContent,
+    TooltipProvider,
+    TooltipTrigger
 } from '@/components/ui'
 import { auth } from '@/firebase'
 import LoginDialog from '@/layout/Base/LoginDialog'
+import { Home, MessageCircle, User } from 'lucide-react'
 
 import { useAuthState } from 'react-firebase-hooks/auth'
-import { useNavigate } from 'react-router-dom'
+import { useLocation, useNavigate } from 'react-router-dom'
 
 const Navbar = () => {
     const [user, loading] = useAuthState(auth)
     const navigate = useNavigate()
+    const location = useLocation()
 
     function handleSignout() {
         auth.signOut()
     }
 
     return (
-        <div className="text- flex h-header w-full items-center justify-between bg-primary px-8 text-neutral-200">
-            <h1 className="text-2xl font-extrabold tracking-wider">CHUNT</h1>
+        <div className="flex h-header w-full items-center justify-between bg-primary px-8 text-neutral-200">
+            <TitleCard />
             <nav className="flex gap-5">
-                <Button variant="ghost" onClick={() => navigate('/')}>
-                    Home
-                </Button>
-                <Button variant="ghost" onClick={() => navigate('/chat')}>
-                    Chat
-                </Button>
-                <Button variant="ghost" onClick={() => navigate('/profile')}>
-                    My Profile
-                </Button>
+                <TooltipProvider>
+                    <Tooltip>
+                        <TooltipTrigger>
+                            <Button variant={location.pathname === '/Home' ? 'secondary' : 'ghost'} onClick={() => navigate('/')}>
+                                <Home />
+                            </Button>
+                        </TooltipTrigger>
+                        <TooltipContent align="center" side="bottom">
+                            Home
+                        </TooltipContent>
+                    </Tooltip>
+                </TooltipProvider>
+                <TooltipProvider>
+                    <Tooltip>
+                        <TooltipTrigger>
+                            <Button variant={location.pathname === '/chat' ? 'secondary' : 'ghost'} onClick={() => navigate('/chat')}>
+                                <MessageCircle />
+                            </Button>
+                        </TooltipTrigger>
+                        <TooltipContent align="center" side="bottom">
+                            Chat
+                        </TooltipContent>
+                    </Tooltip>
+                </TooltipProvider>
+                <TooltipProvider>
+                    <Tooltip>
+                        <TooltipTrigger>
+                            <Button variant={location.pathname === '/profile' ? 'secondary' : 'ghost'} onClick={() => navigate('/profile')}>
+                                <User />
+                            </Button>
+                        </TooltipTrigger>
+                        <TooltipContent align="center" side="bottom">
+                            Profile
+                        </TooltipContent>
+                    </Tooltip>
+                </TooltipProvider>
             </nav>
             {loading ? (
                 <Skeleton className="h-10 w-10 rounded-full" />
