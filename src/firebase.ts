@@ -2,8 +2,10 @@
 import { User, UserConverter } from '@/classes/User'
 import { getAnalytics } from 'firebase/analytics'
 import { initializeApp } from 'firebase/app'
+import { ReCaptchaV3Provider, initializeAppCheck } from 'firebase/app-check'
 import { getAuth } from 'firebase/auth'
 import { doc, getFirestore, setDoc } from 'firebase/firestore'
+import { getStorage } from 'firebase/storage'
 
 // Your web app's Firebase configuration
 // For Firebase JS SDK v7.20.0 and later, measurementId is optional
@@ -23,6 +25,11 @@ export const app = initializeApp(firebaseConfig)
 export const auth = getAuth(app)
 export const analytics = getAnalytics(app)
 export const db = getFirestore(app)
+export const storage = getStorage(app)
+export const appCheck = initializeAppCheck(app, {
+    provider: new ReCaptchaV3Provider('6Lc1_h8pAAAAAD6QuqbiqGnpVaN1xf3ZwbY_xzda'),
+    isTokenAutoRefreshEnabled: true
+})
 
 auth.onAuthStateChanged(function (user) {
     // update avatar for every logind
