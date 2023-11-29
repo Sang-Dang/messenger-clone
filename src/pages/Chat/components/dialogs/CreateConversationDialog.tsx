@@ -15,26 +15,31 @@ import {
     ScrollArea,
     toast
 } from '@/components/ui'
-import { auth, db } from '@/firebase'
+import { db } from '@/firebase'
+import useAuth from '@/lib/hooks/useAuth'
 import useRefresh from '@/lib/hooks/useRefresh'
 import UserCard from '@/pages/Chat/components/common/UserCard'
 import { DocumentData, QuerySnapshot, collection, doc, documentId, getDocs, or, query, where } from 'firebase/firestore'
 import { X } from 'lucide-react'
-import { ChangeEvent, ReactNode, useEffect, useRef, useState } from 'react'
-import { useAuthState } from 'react-firebase-hooks/auth'
+import { ChangeEvent, Dispatch, ReactNode, SetStateAction, useEffect, useMemo, useRef, useState } from 'react'
 import { useCollectionOnce } from 'react-firebase-hooks/firestore'
 
+type SelectedUsersType = {
+    [key: string]: {
+        name: string
+    }
+}
 type CreateConversationDialogProps = {
     children?: ReactNode
 }
 export default function CreateConversationDialog({ children }: CreateConversationDialogProps) {
-    const [user] = useAuthState(auth)
+    const { user } = useAuth()
     const [isDialogOpen, setIsDialogOpen] = useState(false)
     const [value, loading, error] = useCollectionOnce(
-        query(collection(db, 'users'), where(documentId(), '!=', user?.uid)).withConverter(UserConverter)
+        query(collection(db, 'users'), where(documentId(), '!=', user.uid)).withConverter(UserConverter)
     )
     const [step, setStep] = useState<number>(1)
-    const [selectedUsers, setSelectedUsers] = useState<string[]>([])
+    const [selectedUsers, setSelectedUsers] = useState<SelectedUsersType>({})
 
     function handleCloseDialog(value: boolean) {
         setIsDialogOpen(value)
@@ -79,7 +84,6 @@ export default function CreateConversationDialog({ children }: CreateConversatio
                             onNext={() => setStep(2)}
                             onSubmit={handleSubmitBuilder}
                             setSelectedUsers={setSelectedUsers}
-                            userId={user!.uid}
                         />
                     )}
                     {step === 2 && <ChatMetadataForm onBack={() => setStep(1)} onSubmit={handleSubmitBuilder} selectedUsers={selectedUsers} />}
@@ -92,27 +96,33 @@ export default function CreateConversationDialog({ children }: CreateConversatio
 type SelectUserFormProps = {
     onNext: () => void
     onSubmit: (dbOperation: () => Promise<number>) => void
-    setSelectedUsers: (users: string[]) => void
+    setSelectedUsers: Dispatch<SetStateAction<SelectedUsersType>>
     data: QuerySnapshot<User, DocumentData>
     loading: boolean
     error: Error | undefined
-    userId: string
 }
-function SelectUserForm({ data, loading, error, onNext, onSubmit, setSelectedUsers, userId }: SelectUserFormProps) {
-    const [isUserSelected, setIsUserSelected] = useState<Set<string>>(new Set())
+function SelectUserForm({ data, loading, error, onNext, onSubmit, setSelectedUsers }: SelectUserFormProps) {
+    const { user } = useAuth()
+    const [isUserSelected, setIsUserSelected] = useState<SelectedUsersType>({})
+    const selectedLength = useMemo(() => Object.keys(isUserSelected).length, [isUserSelected])
     const [searchValue, setSearchValue] = useState('')
     const refresh = useRefresh()
 
     useEffect(() => {
-        isUserSelected.add(userId)
-    }, [isUserSelected, userId])
+        setIsUserSelected((prev) => ({
+            ...prev,
+            [user.uid]: {
+                name: user.displayName!
+            }
+        }))
+    }, [isUserSelected, user])
 
     function handleSubmit_DualConversation() {
         onSubmit(async () => {
             // check if conversation already exists
-            const values = isUserSelected.values()
-            const currentUserRef = doc(db, 'users', values.next().value)
-            const selectedUserRef = doc(db, 'users', values.next().value)
+            const values = Object.keys(isUserSelected)
+            const currentUserRef = doc(db, 'users', values[0])
+            const selectedUserRef = doc(db, 'users', values[1])
             const q = query(
                 collection(db, 'chats'),
                 or(where('users', '==', [currentUserRef, selectedUserRef]), where('users', '==', [selectedUserRef, currentUserRef]))
@@ -121,26 +131,41 @@ function SelectUserForm({ data, loading, error, onNext, onSubmit, setSelectedUse
 
             // if not, create new conversation
             if (snapshot.empty) {
-                CreateChat(Array.from(isUserSelected))
-                return isUserSelected.size
+                // TODO - unlink chatName
+                CreateChat(
+                    Object.keys(isUserSelected),
+                    Object.values(isUserSelected)
+                        .map((val) => val.name)
+                        .join(',')
+                )
+                return Object.keys(isUserSelected).length
             } else {
                 throw new Error('Conversation already exists')
             }
         })
     }
 
-    function handleSelect(id: string) {
-        if (isUserSelected.has(id)) {
-            isUserSelected.delete(id)
+    function handleSelect(id: string, name: string) {
+        const keys = Object.keys(isUserSelected)
+
+        if (keys.includes(id)) {
+            setIsUserSelected((prev) => {
+                delete prev[id]
+                return prev
+            })
         } else {
-            isUserSelected.add(id)
+            setIsUserSelected((prev) => ({
+                ...prev,
+                [id]: {
+                    name: name
+                }
+            }))
         }
-        setIsUserSelected(isUserSelected)
         refresh()
     }
 
     function handleClearSelection() {
-        setIsUserSelected(new Set())
+        setIsUserSelected({})
         refresh()
     }
 
@@ -172,11 +197,17 @@ function SelectUserForm({ data, loading, error, onNext, onSubmit, setSelectedUse
                             doc.data().email.toLowerCase().includes(searchValue.toLowerCase())
                     )
                     .map((doc) => (
-                        <UserCard key={doc.id} doc={doc} isUserSelected={isUserSelected} handleSelect={handleSelect} searchTerm={searchValue} />
+                        <UserCard
+                            key={doc.id}
+                            doc={doc}
+                            isUserSelected={Object.keys(isUserSelected).includes(doc.id)}
+                            handleSelect={() => handleSelect(doc.id, doc.data().name)}
+                            searchTerm={searchValue}
+                        />
                     ))}
             </ScrollArea>
             <DialogFooter>
-                {isUserSelected.size > 1 ? (
+                {selectedLength > 1 ? (
                     <Button variant="outline" onClick={handleClearSelection}>
                         Clear
                     </Button>
@@ -187,20 +218,20 @@ function SelectUserForm({ data, loading, error, onNext, onSubmit, setSelectedUse
                 )}
                 <Button
                     onClick={() => {
-                        if (isUserSelected.size < 2) return
-                        if (isUserSelected.size === 2) handleSubmit_DualConversation()
+                        if (selectedLength < 2) return
+                        if (selectedLength === 2) handleSubmit_DualConversation()
                         else {
-                            setSelectedUsers(Array.from(isUserSelected))
+                            setSelectedUsers(isUserSelected)
                             onNext()
                         }
                     }}
-                    disabled={isUserSelected.size <= 1}
+                    disabled={selectedLength <= 1}
                 >
-                    {isUserSelected.size > 1 ? (
+                    {selectedLength > 1 ? (
                         <>
                             Start conversation with&nbsp;
                             <strong className="font-bold">
-                                {isUserSelected.size} user{isUserSelected.size > 1 && 's'}
+                                {selectedLength} user{selectedLength !== 1 && 's'}
                             </strong>
                         </>
                     ) : (
@@ -215,7 +246,7 @@ function SelectUserForm({ data, loading, error, onNext, onSubmit, setSelectedUse
 type ChatMetadataFormProps = {
     onBack: () => void
     onSubmit: (dbOperation: () => Promise<number>) => void
-    selectedUsers: string[]
+    selectedUsers: SelectedUsersType
 }
 function ChatMetadataForm({ selectedUsers, onBack, onSubmit }: ChatMetadataFormProps) {
     const [inputChatName, setInputChatName] = useState<InputValue<string>>({
@@ -230,8 +261,8 @@ function ChatMetadataForm({ selectedUsers, onBack, onSubmit }: ChatMetadataFormP
 
     function handleSubmit_GroupConversation() {
         onSubmit(async () => {
-            CreateChat(selectedUsers, inputChatName.value, inputAvatar.value ? URL.createObjectURL(inputAvatar.value.file!) : '')
-            return selectedUsers.length
+            CreateChat(Object.keys(selectedUsers), inputChatName.value, inputAvatar.value ? URL.createObjectURL(inputAvatar.value.file!) : '')
+            return Object.keys(selectedUsers).length
         })
     }
 
@@ -293,7 +324,7 @@ function ChatMetadataForm({ selectedUsers, onBack, onSubmit }: ChatMetadataFormP
                 </Avatar>
                 <div className="flex flex-col items-start justify-center">
                     <h5 className="text-lg font-bold">{inputChatName.value ? inputChatName.value : 'Name of your group chat'}</h5>
-                    <span className="text-sm font-light">{selectedUsers.length} people</span>
+                    <span className="text-sm font-light">{Object.keys(selectedUsers).length} people</span>
                 </div>
             </div>
             <div className="mb-3">

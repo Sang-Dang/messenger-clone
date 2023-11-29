@@ -39,7 +39,7 @@ type ChatListViewProps = {
 function ChatListView({ chats }: ChatListViewProps) {
     const [searchTerm, setSearchTerm] = useState('')
 
-    chats = chats.filter((cur) => cur.chatName.includes(searchTerm))
+    chats = chats.filter((cur) => cur.chatName.toLowerCase().includes(searchTerm.toLowerCase()))
 
     return (
         <div className="flex flex-col gap-3">
