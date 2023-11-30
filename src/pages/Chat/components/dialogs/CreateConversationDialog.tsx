@@ -1,5 +1,6 @@
 import { CreateChat } from '@/api/chat'
 import { User, UserConverter } from '@/classes/User'
+import LoadingSpinner from '@/components/LoadingSpinner'
 import {
     Avatar,
     AvatarImage,
@@ -13,6 +14,10 @@ import {
     Input,
     Label,
     ScrollArea,
+    Tooltip,
+    TooltipContent,
+    TooltipProvider,
+    TooltipTrigger,
     toast
 } from '@/components/ui'
 import { db } from '@/firebase'
@@ -20,6 +25,7 @@ import useAuth from '@/lib/hooks/useAuth'
 import useRefresh from '@/lib/hooks/useRefresh'
 import UserCard from '@/pages/Chat/components/common/UserCard'
 import { DocumentData, QuerySnapshot, collection, doc, documentId, getDocs, or, query, where } from 'firebase/firestore'
+import { AnimatePresence } from 'framer-motion'
 import { X } from 'lucide-react'
 import { ChangeEvent, Dispatch, ReactNode, SetStateAction, useEffect, useMemo, useRef, useState } from 'react'
 import { useCollectionOnce } from 'react-firebase-hooks/firestore'
@@ -31,8 +37,9 @@ type SelectedUsersType = {
 }
 type CreateConversationDialogProps = {
     children?: ReactNode
+    tooltipContent?: ReactNode
 }
-export default function CreateConversationDialog({ children }: CreateConversationDialogProps) {
+export default function CreateConversationDialog({ children, tooltipContent }: CreateConversationDialogProps) {
     const { user } = useAuth()
     const [isDialogOpen, setIsDialogOpen] = useState(false)
     const [value, loading, error] = useCollectionOnce(
@@ -72,10 +79,21 @@ export default function CreateConversationDialog({ children }: CreateConversatio
     return (
         <>
             <Dialog open={isDialogOpen} onOpenChange={handleCloseDialog}>
-                <DialogTrigger asChild>{children}</DialogTrigger>
-                <DialogContent>
-                    <DialogHeader className="font-bold">Start a conversation</DialogHeader>
-                    <DialogDescription className="mb-4">Who do you want to talk to? Please select a user below!</DialogDescription>
+                <TooltipProvider>
+                    <Tooltip delayDuration={0.3}>
+                        <TooltipTrigger asChild>
+                            <DialogTrigger asChild>{children}</DialogTrigger>
+                        </TooltipTrigger>
+                        {tooltipContent && (
+                            <TooltipContent side="bottom" arrowPadding={10}>
+                                {tooltipContent}
+                            </TooltipContent>
+                        )}
+                    </Tooltip>
+                </TooltipProvider>
+                <DialogContent className="gap-0">
+                    <DialogHeader className="text-h3 font-bold">Start a conversation</DialogHeader>
+                    <DialogDescription className="text-small mb-4">Create a new amazing chat room with your friends!</DialogDescription>
                     {step === 1 && (
                         <SelectUserForm
                             data={value!}
@@ -95,7 +113,7 @@ export default function CreateConversationDialog({ children }: CreateConversatio
 
 type SelectUserFormProps = {
     onNext: () => void
-    onSubmit: (dbOperation: () => Promise<number>) => void
+    onSubmit: (dbOperation: () => Promise<number>) => Promise<void>
     setSelectedUsers: Dispatch<SetStateAction<SelectedUsersType>>
     data: QuerySnapshot<User, DocumentData>
     loading: boolean
@@ -117,8 +135,8 @@ function SelectUserForm({ data, loading, error, onNext, onSubmit, setSelectedUse
         }))
     }, [isUserSelected, user])
 
-    function handleSubmit_DualConversation() {
-        onSubmit(async () => {
+    async function handleSubmit_DualConversation() {
+        await onSubmit(async () => {
             // check if conversation already exists
             const values = Object.keys(isUserSelected)
             const currentUserRef = doc(db, 'users', values[0])
@@ -179,10 +197,10 @@ function SelectUserForm({ data, loading, error, onNext, onSubmit, setSelectedUse
 
     return (
         <>
-            <div className="mb-4">
+            <div className="mb-2">
                 <Input
                     placeholder="Search by Name or Email"
-                    className="w-1/2"
+                    className="w-full"
                     value={searchValue}
                     onChange={(e) => setSearchValue(e.target.value)}
                     autoComplete="off"
@@ -206,7 +224,7 @@ function SelectUserForm({ data, loading, error, onNext, onSubmit, setSelectedUse
                         />
                     ))}
             </ScrollArea>
-            <DialogFooter>
+            <DialogFooter className="mt-4">
                 {selectedLength > 1 ? (
                     <Button variant="outline" onClick={handleClearSelection}>
                         Clear
@@ -245,10 +263,11 @@ function SelectUserForm({ data, loading, error, onNext, onSubmit, setSelectedUse
 
 type ChatMetadataFormProps = {
     onBack: () => void
-    onSubmit: (dbOperation: () => Promise<number>) => void
+    onSubmit: (dbOperation: () => Promise<number>) => Promise<void>
     selectedUsers: SelectedUsersType
 }
 function ChatMetadataForm({ selectedUsers, onBack, onSubmit }: ChatMetadataFormProps) {
+    const [isSubmitting, setIsSubmitting] = useState(false)
     const [inputChatName, setInputChatName] = useState<InputValue<string>>({
         value: '',
         error: null
@@ -259,11 +278,13 @@ function ChatMetadataForm({ selectedUsers, onBack, onSubmit }: ChatMetadataFormP
     })
     const fileInputRef = useRef<HTMLInputElement>(null)
 
-    function handleSubmit_GroupConversation() {
-        onSubmit(async () => {
-            CreateChat(Object.keys(selectedUsers), inputChatName.value, inputAvatar.value ? URL.createObjectURL(inputAvatar.value.file!) : '')
+    async function handleSubmit_GroupConversation() {
+        setIsSubmitting(true)
+        await onSubmit(async () => {
+            await CreateChat(Object.keys(selectedUsers), inputChatName.value, inputAvatar.value ? inputAvatar.value.file : undefined)
             return Object.keys(selectedUsers).length
         })
+        setIsSubmitting(false)
     }
 
     function handleChange_ChatName(e: ChangeEvent<HTMLInputElement>) {
@@ -328,7 +349,7 @@ function ChatMetadataForm({ selectedUsers, onBack, onSubmit }: ChatMetadataFormP
                 </div>
             </div>
             <div className="mb-3">
-                <Label className="mb-2 block" htmlFor="input_chatname">
+                <Label className="text-p mb-2 block" htmlFor="input_chatname">
                     Chat name
                 </Label>
                 <Input id="input_chatname" value={inputChatName.value} onChange={handleChange_ChatName} />
@@ -336,7 +357,7 @@ function ChatMetadataForm({ selectedUsers, onBack, onSubmit }: ChatMetadataFormP
             </div>
             <div>
                 <div className="relative mb-2 flex justify-between">
-                    <Label htmlFor="input_avatar">Avatar</Label>
+                    <Label htmlFor="input_avatar text-p">Avatar</Label>
                     {inputAvatar.value && (
                         <Button
                             variant="ghost"
@@ -356,11 +377,12 @@ function ChatMetadataForm({ selectedUsers, onBack, onSubmit }: ChatMetadataFormP
                 <Input id="input_avatar" type="file" accept="image/*" onChange={handleChange_Avatar} className="cursor-pointer" ref={fileInputRef} />
                 <div className="mt-1 block h-5 text-sm text-red-500">{inputAvatar.error}</div>
             </div>
-            <DialogFooter>
+            <DialogFooter className="mt-4">
                 <Button variant="outline" onClick={onBack}>
                     Back
                 </Button>
-                <Button onClick={handleSubmit_GroupConversation} disabled={!inputChatName.value && !inputAvatar.value}>
+                <Button onClick={handleSubmit_GroupConversation} disabled={(!inputChatName.value && !inputAvatar.value) || isSubmitting}>
+                    <AnimatePresence>{isSubmitting && <LoadingSpinner type="light" className="mr-2 w-7" />}</AnimatePresence>
                     Create
                 </Button>
             </DialogFooter>

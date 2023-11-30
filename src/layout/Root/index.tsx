@@ -1,29 +1,17 @@
 import { User, UserConverter } from '@/classes/User'
+import UserActivity from '@/classes/UserActivity'
 import { Toaster } from '@/components/ui'
-import { auth, db, rtdb } from '@/firebase'
+import { auth, db } from '@/firebase'
 import LoadingContextProvider from '@/lib/context/LoadingContext'
 import useMobile from '@/lib/hooks/useMobile'
-import { onDisconnect, ref, set } from 'firebase/database'
 import { doc, setDoc } from 'firebase/firestore'
 import { LucideComputer } from 'lucide-react'
-import { useEffect, useRef } from 'react'
+import { useRef } from 'react'
 import { Outlet } from 'react-router-dom'
 
 export default function RootLayout() {
-    const interval = useRef<NodeJS.Timeout | null>(null)
-    useEffect(() => {
-        return () => {
-            if (auth.currentUser) {
-                if (interval.current) {
-                    clearInterval(interval.current)
-                }
-                onDisconnect(ref(rtdb, `users/${auth.currentUser.uid}`)).cancel()
-                set(ref(rtdb, `users/${auth.currentUser.uid}`), { lastActive: new Date().toString(), activity: 'inactive' })
-            }
-        }
-    }, [])
-
     const isMobile = useMobile()
+    const userActivityRef = useRef<UserActivity | null>(null)
     if (isMobile) {
         return (
             <div className="flex h-screen w-screen flex-col items-center justify-center bg-red-500">
@@ -37,7 +25,7 @@ export default function RootLayout() {
     }
 
     auth.onAuthStateChanged(function (user) {
-        // update avatar for every logind
+        // update avatar for every login
         if (user) {
             const docRef = doc(db, 'users', user.uid).withConverter(UserConverter)
             setDoc(
@@ -51,16 +39,17 @@ export default function RootLayout() {
                 )
             )
 
-            if (!interval.current) {
-                set(ref(rtdb, `users/${user.uid}`), { lastActive: new Date().toString(), activity: 'active' })
-                interval.current = setInterval(
-                    () => {
-                        set(ref(rtdb, `users/${user.uid}`), { lastActive: new Date().toString(), activity: 'active' })
-                    },
-                    1000 * 60 * 5
-                ) // 5 minutes
-            }
-            onDisconnect(ref(rtdb, `users/${user.uid}`)).set({ lastActive: new Date().toString(), activity: 'inactive' })
+            // update last active
+            const userActivity = new UserActivity(user.uid)
+            userActivity.online()
+            userActivityRef.current = userActivity
+        }
+    })
+
+    auth.onAuthStateChanged(function (user) {
+        if (!user) {
+            userActivityRef.current?.offline()
+            userActivityRef.current = null
         }
     })
 

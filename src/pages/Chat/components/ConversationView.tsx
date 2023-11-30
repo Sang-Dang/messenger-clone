@@ -33,7 +33,7 @@ function ConversationViewData({ chatId }: ConversationViewDataType) {
     const [chat, loadingChat, errorChat] = useDocumentOnce(doc(db, 'chats', chatId).withConverter(ChatConverter))
 
     if (loadingChat || !chat) {
-        return <div>Loading...</div>
+        return
     }
 
     if (errorChat) {
@@ -43,10 +43,10 @@ function ConversationViewData({ chatId }: ConversationViewDataType) {
     const chatData = chat.data()!
 
     return (
-        <div className="flex h-full flex-col">
+        <div className="flex h-full w-full flex-col">
             <ChatHeader chat={chatData} className="h-header" />
             <MessagesViewContainer chatId={chatId} userIds={chat.data()?.users ?? []} />
-            <MessageInputBox chatId={chatId} className="h-header" />
+            <MessageInputBox chatId={chatId} className="" />
         </div>
     )
 }

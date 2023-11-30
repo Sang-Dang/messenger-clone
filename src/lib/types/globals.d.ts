@@ -12,4 +12,12 @@ declare global {
     }
 
     type UserActivity = 'active' | 'inactive'
+    type RT_UserActivity = {
+        activity: UserActivity
+        lastActive: string
+    }
+    type UserActivityObj = {
+        activity: UserActivity
+        lastActive: Date
+    }
 }

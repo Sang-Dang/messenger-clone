@@ -9,7 +9,7 @@ export default function Test() {
     return (
         <>
             <Switch checked={show} onCheckedChange={setShow} />
-            <AnimatePresence>{show ? <LoadingSpinner type="dark" /> : null}</AnimatePresence>
+            <AnimatePresence>{show ? <LoadingSpinner type="dark" className="w-10" /> : null}</AnimatePresence>
         </>
     )
 }

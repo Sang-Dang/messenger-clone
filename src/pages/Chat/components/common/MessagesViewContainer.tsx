@@ -43,7 +43,7 @@ export default function MessagesViewContainer({ className, chatId, userIds }: Me
     return (
         <div className={cn('flex h-[calc(var(--full-height-no-header)-var(--header-height)*2)] flex-col justify-end', className)}>
             {loadingMessages ? (
-                <div className="flex h-full w-full flex-col items-center justify-center">Loading...</div>
+                <div className="flex h-full w-full flex-col items-center justify-center">{/* <LoadingSpinner type="dark" /> */}</div>
             ) : messages!.length === 0 ? (
                 <div className="flex h-full w-full flex-col items-center justify-center">
                     <MessageSquare size={100} />
@@ -51,13 +51,13 @@ export default function MessagesViewContainer({ className, chatId, userIds }: Me
                     <p className="mt-1 font-light">Type your first message in the input box below.</p>
                 </div>
             ) : (
-                <div className="overflow-y-auto px-3 pt-5" ref={scrollRef}>
+                <div className="w-full overflow-y-auto px-3 pt-5" ref={scrollRef}>
                     {messages!.map((data, index, array) => (
                         <Fragment key={data.id}>
                             {differenceInMinutes(new Date(data.createdOn), new Date(array[index - 1]?.createdOn)) > 10 && (
                                 <div className="relative mx-auto my-10">
-                                    <Separator className="w-full bg-primary/40" />
-                                    <p className="absolute left-1/2 w-max -translate-x-1/2 -translate-y-1/2 bg-white px-3 text-primary/70">
+                                    <Separator className="w-full bg-primary/20" />
+                                    <p className="absolute left-1/2 w-max -translate-x-1/2 -translate-y-1/2 bg-white px-3 text-sm font-light text-primary/70">
                                         {format(new Date(data.createdOn), 'dd/MM/yyyy - HH:mm')}
                                     </p>
                                 </div>

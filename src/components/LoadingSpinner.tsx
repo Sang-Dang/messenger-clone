@@ -3,8 +3,9 @@ import { useCallback, useEffect, useState } from 'react'
 
 type LoadingSpinnerProps = {
     type: 'dark' | 'light'
+    className?: string
 }
-export default function LoadingSpinner({ type }: LoadingSpinnerProps) {
+export default function LoadingSpinner({ type, className }: LoadingSpinnerProps) {
     const [isPresent, safeToRemove] = usePresence()
     const [scope, animate] = useAnimate()
     const [rotation, setRotation] = useState(0)
@@ -73,6 +74,7 @@ export default function LoadingSpinner({ type }: LoadingSpinnerProps) {
             ref={scope}
             src={type === 'light' ? '/svg/light-logo-only-transparent.svg' : '/svg/dark-logo-only-transparent.svg'}
             alt="loading-spinner"
+            className={className}
         />
     )
 }

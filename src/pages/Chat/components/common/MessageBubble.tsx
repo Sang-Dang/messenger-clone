@@ -20,7 +20,7 @@ export default function MessageBubble({ data, sender, showAvatar = true }: Props
     }
 
     return (
-        <div className={cn('flex items-center gap-3', isMe && 'flex-row-reverse', !isAvatarShown && 'mb-[2px]', isAvatarShown && 'mb-3')}>
+        <div className={cn('flex items-end gap-3', isMe && 'flex-row-reverse', !isAvatarShown && 'mb-[2px]', isAvatarShown && 'mb-3')}>
             {isAvatarShown && (
                 <Avatar className="aspect-square h-full w-[40px]">
                     <AvatarImage src={sender.avatar} alt="avatar" className="h-full w-full" />
@@ -29,14 +29,14 @@ export default function MessageBubble({ data, sender, showAvatar = true }: Props
             )}
             <div
                 className={cn(
-                    'inline-flex w-max items-center rounded-lg p-3 font-[500] text-white',
+                    'inline-flex w-max max-w-[500px] items-center rounded-2xl p-3 font-[400]',
                     !isAvatarShown && 'ml-[52px]',
                     isMe && 'mr-[10px]',
                     !hasOnlyEmojis && 'bg-blue-500',
-                    hasOnlyEmojis && 'text-5xl'
+                    hasOnlyEmojis && 'p-0 py-6 text-5xl'
                 )}
             >
-                {data.message}
+                <span className="w-full hyphens-auto break-words text-white">{data.message}</span>
             </div>
         </div>
     )

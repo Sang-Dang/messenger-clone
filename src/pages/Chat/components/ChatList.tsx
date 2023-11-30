@@ -1,5 +1,5 @@
 import { Chat, ChatConverter } from '@/classes/Chat'
-import { Input } from '@/components/ui'
+import { Input, ScrollArea } from '@/components/ui'
 import { fetchUsers } from '@/features/Users/UsersSlice'
 import { db } from '@/firebase'
 import useAppDispatch from '@/lib/hooks/useAppDispatch'
@@ -42,17 +42,21 @@ function ChatListView({ chats }: ChatListViewProps) {
     chats = chats.filter((cur) => cur.chatName.toLowerCase().includes(searchTerm.toLowerCase()))
 
     return (
-        <div className="flex flex-col gap-3">
+        <>
             <Input
                 type="search"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 placeholder="Search for Chats"
-                className="focus-visible:ring-0"
+                className="mb-2 rounded-full p-5 focus-visible:ring-0"
             />
-            {chats.map((cur) => (
-                <ChatCard key={cur.id} chat={cur} />
-            ))}
-        </div>
+            <ScrollArea className="flex-grow overflow-y-auto px-3">
+                {chats.map((cur) => (
+                    <div className="my-2 first-of-type:mt-0 last-of-type:mb-0">
+                        <ChatCard key={cur.id} chat={cur} />
+                    </div>
+                ))}
+            </ScrollArea>
+        </>
     )
 }

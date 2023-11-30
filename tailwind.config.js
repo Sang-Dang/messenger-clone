@@ -69,6 +69,23 @@ export default {
             height: {
                 header: 'var(--header-height)',
                 fullNoHeader: 'var(--full-height-no-header)'
+            },
+            padding: {
+                std: 'var(--std-padding)'
+            },
+            margin: {
+                std: 'var(--std-margin)'
+            },
+            fontSize: {
+                h1: 'var(--h1-font-size)',
+                h2: 'var(--h2-font-size)',
+                h3: 'var(--h3-font-size)',
+                h4: 'var(--h4-font-size)',
+                h5: 'var(--h5-font-size)',
+                h6: 'var(--h6-font-size)',
+                p: 'var(--p-font-size)',
+                small: 'var(--small-font-size)',
+                tiny: 'var(--tiny-font-size)'
             }
         }
     },

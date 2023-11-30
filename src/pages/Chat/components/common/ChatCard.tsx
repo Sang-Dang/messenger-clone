@@ -3,12 +3,14 @@ import { Message } from '@/classes/Message'
 import { Avatar, AvatarFallback, AvatarImage, DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui'
 import { setChatId } from '@/features/Conversation/ConversationSlice'
 import { selectUserById } from '@/features/Users/UsersSelectors'
+import { storage } from '@/firebase'
 import useAppDispatch from '@/lib/hooks/useAppDispatch'
 import useAppSelector from '@/lib/hooks/useAppSelector'
 import useAuth from '@/lib/hooks/useAuth'
 import { cn } from '@/lib/utils'
+import { getDownloadURL, ref } from 'firebase/storage'
 import { MoreHorizontal } from 'lucide-react'
-import { memo, useMemo } from 'react'
+import { memo, useEffect, useMemo, useState } from 'react'
 
 type Props = {
     chat: Chat
@@ -50,20 +52,22 @@ const ChatCardView = memo(({ id, chatName, avatar, lastMessage }: ChatCardViewPr
     }
 
     return (
-        <div className="group relative">
+        <div className="group relative w-full">
             <ChatOptionsView className="peer pointer-events-none invisible absolute right-5 top-1/2 -translate-y-1/2 opacity-0 transition-all group-hover:pointer-events-auto group-hover:visible group-hover:opacity-100" />
             <div
                 id="chatcard"
                 className={cn(
-                    'group flex h-[80px] cursor-pointer select-none items-center gap-5 rounded-lg p-[10px] transition-all hover:bg-neutral-200 peer-hover:bg-neutral-200',
+                    'group flex h-[80px] w-full cursor-pointer select-none items-center gap-5 rounded-2xl p-[10px] transition-all hover:bg-neutral-200 peer-hover:bg-neutral-200',
                     selectedChatCard === id && 'bg-neutral-200'
                 )}
                 onClick={handleChangeChat}
             >
                 <ChatAvatarView avatar={avatar} fallback={chatName.slice(0, 2)} className="h-[50px] w-[50px] rounded-full" />
                 <div className="flex flex-col items-start justify-center">
-                    <TitleView chatName={chatName} className="text-lg font-semibold" />
-                    {lastMessage !== null ? <LastMessageView lastMessage={lastMessage} className="text-sm font-light" /> : 'There are no messages'}
+                    <TitleView chatName={chatName} className="text-h6 font-semibold" />
+                    <p className="text-small w-48 overflow-hidden overflow-ellipsis whitespace-nowrap font-normal tracking-wide">
+                        {lastMessage !== null ? <LastMessageView lastMessage={lastMessage} /> : 'There are no messages'}
+                    </p>
                 </div>
             </div>
         </div>
@@ -76,24 +80,21 @@ type TitleViewProps = {
     className?: string
 }
 const TitleView = memo(({ chatName, className }: TitleViewProps) => {
-    return <h5 className={cn(className)}>{chatName}</h5>
+    return <h5 className={cn('w-52 overflow-hidden text-ellipsis whitespace-nowrap', className)}>{chatName}</h5>
 })
 
 // ------------------------------
 type LastMessageViewProps = {
     lastMessage: Message
-    className?: string
 }
-const LastMessageView = memo(({ lastMessage, className }: LastMessageViewProps) => {
+const LastMessageView = memo(({ lastMessage }: LastMessageViewProps) => {
     const { user } = useAuth()
     const sender = useAppSelector(selectUserById(lastMessage.userId))
     return (
-        <p className={cn(className)}>
-            {sender &&
-                (sender.id === user.uid ? 'You' : sender.name) +
-                    ': ' +
-                    (lastMessage.message.length > 30 ? lastMessage.message.slice(0, 30) + '...' : lastMessage.message)}
-        </p>
+        sender &&
+        (sender.id === user.uid ? 'You' : sender.name) +
+            ': ' +
+            (lastMessage.message.length > 30 ? lastMessage.message.slice(0, 30) + '...' : lastMessage.message)
     )
 })
 
@@ -104,9 +105,26 @@ type ChatAvatarViewProps = {
     fallback: string
 }
 const ChatAvatarView = memo(({ className, avatar, fallback }: ChatAvatarViewProps) => {
+    const [avatarObj, setAvatarObj] = useState<string | undefined>()
+
+    useEffect(() => {
+        if (avatar.startsWith('chatAvatars/')) {
+            const storageRef = ref(storage, avatar)
+            getDownloadURL(storageRef)
+                .then((url) => {
+                    setAvatarObj(url)
+                })
+                .catch((error) => {
+                    console.log(error)
+                })
+        } else {
+            setAvatarObj(avatar)
+        }
+    }, [avatar])
+
     return (
         <Avatar className={cn(className)}>
-            <AvatarImage src={avatar} alt="avatar" className="h-[50px] w-[50px]" />
+            <AvatarImage src={avatarObj} alt="avatar" className="h-[50px] w-[50px]" />
             <AvatarFallback className="h-[50px] w-[50px] text-neutral-900 ">{fallback}</AvatarFallback>
         </Avatar>
     )
