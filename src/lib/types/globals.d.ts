@@ -10,4 +10,6 @@ declare global {
         file: File | undefined
         name: string | undefined
     }
+
+    type UserActivity = 'active' | 'inactive'
 }
