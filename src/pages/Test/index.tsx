@@ -1,3 +1,15 @@
+import LoadingSpinner from '@/components/LoadingSpinner'
+import { Switch } from '@/components/ui'
+import { AnimatePresence } from 'framer-motion'
+import { useState } from 'react'
+
 export default function Test() {
-    return <div>hi</div>
+    const [show, setShow] = useState(false)
+
+    return (
+        <>
+            <Switch checked={show} onCheckedChange={setShow} />
+            <AnimatePresence>{show ? <LoadingSpinner type="dark" /> : null}</AnimatePresence>
+        </>
+    )
 }
