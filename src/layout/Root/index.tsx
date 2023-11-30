@@ -1,4 +1,5 @@
 import { Toaster } from '@/components/ui'
+import LoadingContextProvider from '@/lib/context/LoadingContext'
 import { LucideComputer } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { Outlet } from 'react-router-dom'
@@ -38,8 +39,10 @@ export default function RootLayout() {
 
     return (
         <>
-            <Toaster />
-            <Outlet />
+            <LoadingContextProvider>
+                <Toaster />
+                <Outlet />
+            </LoadingContextProvider>
         </>
     )
 }

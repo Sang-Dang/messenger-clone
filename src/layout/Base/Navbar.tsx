@@ -39,7 +39,7 @@ const Navbar = () => {
                 <TooltipProvider>
                     <Tooltip>
                         <TooltipTrigger>
-                            <Button variant={location.pathname === '/Home' ? 'secondary' : 'ghost'} onClick={() => navigate('/')}>
+                            <Button variant={location.pathname === '/' ? 'secondary' : 'ghost'} onClick={() => navigate('/')}>
                                 <Home />
                             </Button>
                         </TooltipTrigger>

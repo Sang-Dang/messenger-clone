@@ -82,7 +82,7 @@ export default function TitleCard() {
             <motion.img
                 variants={imageVariants}
                 animate={isHovered ? 'hover' : 'idle'}
-                src="/svg/dark-logo-only-transparent.svg"
+                src="/svg/light-logo-only-transparent.svg"
                 alt="Chunt"
                 height={50}
                 width={50}

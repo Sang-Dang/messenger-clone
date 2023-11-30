@@ -1,6 +1,5 @@
 import Navbar from '@/layout/Base/Navbar'
-import React from 'react'
-import { memo } from 'react'
+import React, { memo } from 'react'
 import { Outlet } from 'react-router-dom'
 
 export default function BaseLayout() {
