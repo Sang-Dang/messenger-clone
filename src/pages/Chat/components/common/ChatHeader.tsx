@@ -43,7 +43,7 @@ export default function ChatHeader({ chat, className }: ChatHeaderProps) {
                         <div className="absolute bottom-0 right-0 h-4 w-4 rounded-full border-2 border-white bg-green-500" />
                     )}
                 </div>
-                <div>
+                <div className="flex-grow">
                     <h1 className="text-xl font-semibold">{chat.chatName}</h1>
                     {recipients.length !== 1 ? (
                         <p className="text-sm text-neutral-400">
@@ -66,6 +66,7 @@ export default function ChatHeader({ chat, className }: ChatHeaderProps) {
                         )
                     )}
                 </div>
+                <div>fdsfds</div>
             </header>
         </>
     )

@@ -1,15 +1,8 @@
-import LoadingSpinner from '@/components/LoadingSpinner'
-import { Switch } from '@/components/ui'
-import { AnimatePresence } from 'framer-motion'
-import { useState } from 'react'
+import { Button } from '@nextui-org/react'
+import { useEffect } from 'react'
 
 export default function Test() {
-    const [show, setShow] = useState(false)
+    useEffect(() => {}, [])
 
-    return (
-        <>
-            <Switch checked={show} onCheckedChange={setShow} />
-            <AnimatePresence>{show ? <LoadingSpinner type="dark" className="w-10" /> : null}</AnimatePresence>
-        </>
-    )
+    return <Button />
 }
