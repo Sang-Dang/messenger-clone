@@ -41,7 +41,7 @@ export default function MessagesViewContainer({ className, chatId, userIds }: Me
     }
 
     return (
-        <div className={cn('flex h-[calc(var(--full-height-no-header)-var(--header-height)*2)] flex-col justify-end', className)}>
+        <div className={cn('flex flex-col justify-end', className)}>
             {loadingMessages ? (
                 <div className="flex h-full w-full flex-col items-center justify-center">{/* <LoadingSpinner type="dark" /> */}</div>
             ) : messages!.length === 0 ? (

@@ -65,7 +65,7 @@ const ChatCardView = memo(({ id, chatName, avatar, lastMessage }: ChatCardViewPr
                 <ChatAvatarView avatar={avatar} fallback={chatName.slice(0, 2)} className="h-[50px] w-[50px] rounded-full" />
                 <div className="flex flex-col items-start justify-center">
                     <TitleView chatName={chatName} className="text-h6 font-semibold" />
-                    <p className="text-small w-48 overflow-hidden overflow-ellipsis whitespace-nowrap font-normal tracking-wide">
+                    <p className="w-48 overflow-hidden overflow-ellipsis whitespace-nowrap text-small font-normal tracking-wide">
                         {lastMessage !== null ? <LastMessageView lastMessage={lastMessage} /> : 'There are no messages'}
                     </p>
                 </div>

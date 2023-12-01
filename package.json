@@ -24,7 +24,6 @@
         "@radix-ui/react-tooltip": "^1.0.7",
         "@reduxjs/toolkit": "^1.9.7",
         "@types/react-redux": "^7.1.31",
-        "@vercel/analytics": "^1.1.1",
         "class-variance-authority": "^0.7.0",
         "date-fns": "^2.30.0",
         "dotenv": "^16.3.1",

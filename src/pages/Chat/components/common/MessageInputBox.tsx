@@ -31,36 +31,36 @@ export default function MessageInputBox({ chatId, className }: MessageInputBoxTy
             }
         }
 
-        function handleInput() {
-            if (inputRef.current?.scrollHeight && inputRef.current?.offsetHeight) {
-                if (inputRef.current.scrollHeight > inputRef.current.offsetHeight) {
-                    inputRef.current.rows += 1
-                }
+        // function handleInput() {
+        //     if (inputRef.current?.scrollHeight && inputRef.current?.offsetHeight) {
+        //         if (inputRef.current.scrollHeight > inputRef.current.offsetHeight) {
+        //             inputRef.current.rows += 1
+        //         }
 
-                if (inputRef.current.scrollHeight < inputRef.current.offsetHeight) {
-                    inputRef.current.rows -= 1
-                }
+        //         if (inputRef.current.scrollHeight < inputRef.current.offsetHeight) {
+        //             inputRef.current.rows -= 1
+        //         }
 
-                if (inputRef.current.rows > 3) {
-                    inputRef.current.rows = 3
-                }
+        //         if (inputRef.current.rows > 3) {
+        //             inputRef.current.rows = 3
+        //         }
 
-                if (inputRef.current.rows < 1) {
-                    inputRef.current.rows = 1
-                }
-            }
-        }
+        //         if (inputRef.current.rows < 1) {
+        //             inputRef.current.rows = 1
+        //         }
+        //     }
+        // }
 
         // TODO FINISH THIS SHIT
 
         function handleNewLine(e: KeyboardEvent) {
-            if (!inputRef.current) return
-
-            if (e.key === 'Enter' && e.shiftKey) {
-                inputRef.current.rows += 1
-            } else if (e.keyCode === 8 && e.shiftKey) {
-                inputRef.current.rows -= 1
-            }
+            // if (!inputRef.current) return
+            // if (e.key === 'Enter' && e.shiftKey) {
+            //     inputRef.current.rows += 1
+            // } else if (e.keyCode === 8 && e.shiftKey) {
+            //     inputRef.current.rows -= 1
+            // }
+            e
         }
 
         window.addEventListener('keydown', handleNewLine)
@@ -76,7 +76,9 @@ export default function MessageInputBox({ chatId, className }: MessageInputBoxTy
             <div className="relative w-full">
                 <Textarea
                     ref={inputRef}
-                    className={cn('relative z-0 h-auto min-h-full resize-none rounded-full bg-red-200 pr-10 leading-loose focus-visible:ring-0')}
+                    className={cn(
+                        'relative z-0 h-auto min-h-full resize-none rounded-3xl bg-neutral-200/70 pr-10 leading-loose focus-visible:ring-0'
+                    )}
                     placeholder="Aa"
                     value={messageInput}
                     onChange={(e) => setMessageInput(e.target.value)}
