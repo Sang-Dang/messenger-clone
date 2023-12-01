@@ -39,8 +39,8 @@ export const MessageConverter: FirestoreDataConverter<Message> = {
             message: message.message,
             createdOn: Timestamp.fromDate(new Date(message.createdOn)),
             type: message.type,
-            deletedOn: message.deletedOn,
-            replies: message.replyIds,
+            deletedOn: message.deletedOn ? Timestamp.fromDate(new Date(message.deletedOn)) : null,
+            replyIds: message.replyIds,
             repliedTo: message.repliedTo
         }
     },
@@ -54,8 +54,8 @@ export const MessageConverter: FirestoreDataConverter<Message> = {
             message: data.message,
             createdOn: (data.createdOn as Timestamp).toDate().toString(),
             type: data.type,
-            deletedOn: data.deletedOn,
-            replyIds: data.replies,
+            deletedOn: data.deletedOn ? (data.deletedOn as Timestamp).toDate().toString() : null,
+            replyIds: data.replyIds,
             repliedTo: data.repliedTo === null ? null : ({ ...data.repliedTo } as ReplyBasic)
         } as Message
     }

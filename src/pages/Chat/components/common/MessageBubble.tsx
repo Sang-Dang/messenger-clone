@@ -15,8 +15,9 @@ type Props = {
     data: Message
     showAvatar?: boolean
     sender: User
+    handleDeleteMessage: (messageId: string) => void
 }
-export default function MessageBubble({ data, sender, showAvatar = true }: Props) {
+export default function MessageBubble({ data, sender, showAvatar = true, handleDeleteMessage }: Props) {
     const { user } = useAuth()
     const [isHovered, setIsHovered] = useState(false)
     const isMe = sender.id === user.uid
@@ -46,16 +47,25 @@ export default function MessageBubble({ data, sender, showAvatar = true }: Props
                         className={cn('relative z-10 mt-3 flex translate-y-1 flex-col items-start', isMe && 'items-end text-right')}
                     />
                 )}
-                <div
-                    className={cn(
-                        'relative z-20 inline-flex w-max max-w-[500px] items-center rounded-2xl p-3 font-[400]',
-                        !hasOnlyEmojis && 'bg-blue-500',
-                        hasOnlyEmojis && 'p-0 pb-2 text-5xl'
-                    )}
-                >
-                    <pre className="relative z-20 w-full hyphens-auto whitespace-pre-wrap break-words font-sans text-white">{data.message}</pre>
-                    <MessageOptions isHovered={isHovered} isMe={isMe} data={data} sender={sender} />
-                </div>
+                {data.type !== 'deleted' ? (
+                    <div
+                        className={cn(
+                            'relative z-20 inline-flex w-max max-w-[500px] items-center rounded-2xl p-3 font-[400]',
+                            !hasOnlyEmojis && 'bg-blue-500',
+                            hasOnlyEmojis && 'p-0 pb-2 text-5xl'
+                        )}
+                    >
+                        <pre className="relative z-20 w-full hyphens-auto whitespace-pre-wrap break-words font-sans text-white">{data.message}</pre>
+
+                        <MessageOptions isHovered={isHovered} isMe={isMe} data={data} sender={sender} handleDeleteMessage={handleDeleteMessage} />
+                    </div>
+                ) : (
+                    <div className="relative z-20 inline-flex w-max max-w-[500px] items-center rounded-2xl border-2 border-neutral-300 bg-transparent p-3 font-[400]">
+                        <pre className="relative z-20 w-full hyphens-auto whitespace-pre-wrap break-words font-sans text-neutral-500">
+                            This message was deleted.
+                        </pre>
+                    </div>
+                )}
             </div>
         </div>
     )
@@ -66,8 +76,9 @@ type MessageOptionsProps = {
     isMe: boolean
     data: Message
     sender: User
+    handleDeleteMessage: (messageId: string) => void
 }
-function MessageOptions({ isHovered, isMe, data, sender }: MessageOptionsProps) {
+function MessageOptions({ isHovered, isMe, data, sender, handleDeleteMessage }: MessageOptionsProps) {
     const { setReply } = useReply()
 
     return (
@@ -128,7 +139,7 @@ function MessageOptions({ isHovered, isMe, data, sender }: MessageOptionsProps) 
                             </Button>
                         </PopoverTrigger>
                         <PopoverContent className="p-2">
-                            <Button type="button" variant="ghost" color="danger">
+                            <Button type="button" variant="ghost" color="danger" onClick={() => handleDeleteMessage(data.id)}>
                                 Remove
                             </Button>
                         </PopoverContent>
@@ -151,7 +162,11 @@ function ReplyCard({ className, repliedTo }: ReplyCardProps) {
                 <ReplyIcon className="mr-2 inline" size={12} />
                 You replied to <strong className="">{username}</strong>
             </div>
-            <div className="w-max rounded-full bg-neutral-200/50 px-3 py-1 text-[13px] text-blur">{repliedTo.message}</div>
+            <div className="w-max rounded-full bg-neutral-200/50 px-3 py-1 text-[13px] text-blur">
+                {repliedTo.type === 'deleted' && 'This message was deleted.'}
+                {repliedTo.type === 'image' && 'Image.'}
+                {repliedTo.type === 'text' && repliedTo.message}
+            </div>
         </div>
     )
 }

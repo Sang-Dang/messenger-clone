@@ -1,3 +1,4 @@
+import { DeleteMessage } from '@/api/messages'
 import { MessageConverter } from '@/classes/Message'
 import { Separator } from '@/components/ui'
 import { selectUserInIdList } from '@/features/Users/UsersSelectors'
@@ -9,7 +10,7 @@ import differenceInMinutes from 'date-fns/differenceInMinutes'
 import format from 'date-fns/format'
 import { collection, orderBy, query } from 'firebase/firestore'
 import { MessageSquare } from 'lucide-react'
-import { Fragment, useEffect, useRef } from 'react'
+import { Fragment, useCallback, useEffect, useRef } from 'react'
 import { useCollectionData } from 'react-firebase-hooks/firestore'
 
 type MessagesViewContainerProps = {
@@ -22,6 +23,17 @@ export default function MessagesViewContainer({ className, chatId, userIds }: Me
     // get conversation messages
     const [messages, loadingMessages, errorMessages] = useCollectionData(
         query(collection(db, 'chats', chatId, 'messages'), orderBy('createdOn', 'asc')).withConverter(MessageConverter)
+    )
+
+    const handleDeleteMessage = useCallback(
+        (messageId: string) => {
+            try {
+                DeleteMessage(messageId, chatId)
+            } catch (error) {
+                console.error(error)
+            }
+        },
+        [chatId]
     )
 
     const scrollRef = useRef<HTMLDivElement>(null)
@@ -66,6 +78,7 @@ export default function MessagesViewContainer({ className, chatId, userIds }: Me
                                 showAvatar={array[index + 1] === undefined || array[index + 1].userId !== data.userId}
                                 key={data.id}
                                 sender={users.filter((user) => user.id === data.userId)[0]}
+                                handleDeleteMessage={handleDeleteMessage}
                             />
                         </Fragment>
                     ))}

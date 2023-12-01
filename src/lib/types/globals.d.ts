@@ -21,7 +21,7 @@ declare global {
         lastActive: Date
     }
 
-    type ChatMessageTypes = 'text' | 'image'
+    type ChatMessageTypes = 'text' | 'image' | 'deleted'
 
     type ChatResponse = {
         id: string
