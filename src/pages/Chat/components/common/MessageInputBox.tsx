@@ -3,7 +3,7 @@ import EmojiSelector from '@/components/EmojiSelector'
 import { Button } from '@/components/ui'
 import useAuth from '@/lib/hooks/useAuth'
 import { cn } from '@/lib/utils'
-import useResponse from '@/pages/Chat/hooks/useResponse'
+import useReply from '@/pages/Chat/hooks/useResponse'
 import { Textarea } from '@nextui-org/react'
 import { Image, PlusIcon, Send, Smile, X } from 'lucide-react'
 import { useCallback, useEffect, useRef, useState } from 'react'
@@ -17,15 +17,19 @@ export default function MessageInputBox({ chatId, className }: MessageInputBoxTy
     const [messageInput, setMessageInput] = useState('')
     const [isFocused, setIsFocused] = useState(false)
     const inputRef = useRef<HTMLTextAreaElement>(null)
-    const { response, setResponse, resetResponse } = useResponse()
+    const { reply, setReply, resetReply } = useReply()
 
     const handleSubmit = useCallback(() => {
         if (user && messageInput.trim()) {
-            CreateMessage(user.uid, messageInput.trim(), chatId, 'text')
+            try {
+                CreateMessage(user.uid, messageInput.trim(), chatId, 'text', reply ?? undefined)
+            } catch (error) {
+                console.log(error)
+            }
         }
         setMessageInput('')
-        resetResponse()
-    }, [chatId, messageInput, resetResponse, user])
+        resetReply()
+    }, [chatId, messageInput, reply, resetReply, user])
 
     function handleChange(value: string) {
         if (value !== '\n') setMessageInput(value)
@@ -64,20 +68,19 @@ export default function MessageInputBox({ chatId, className }: MessageInputBoxTy
                     onClear={() => setMessageInput('')}
                     placeholder="Aa"
                     label={
-                        response && ( // has response
+                        reply && ( // has response
                             <div className="flex flex-col gap-0">
                                 <div className="flex items-center gap-1 ">
                                     <span>
-                                        Responding to{' '}
-                                        <strong className="font-bold">{response.userId === user.uid ? 'Yourself' : response.name}</strong>
+                                        Responding to <strong className="font-bold">{reply.userId === user.uid ? 'Yourself' : reply.username}</strong>
                                     </span>
-                                    <Button variant="ghost" className="h-min p-0 leading-[0] tracking-[0]" onClick={() => setResponse(null)}>
+                                    <Button variant="ghost" className="h-min p-0 leading-[0] tracking-[0]" onClick={() => setReply(null)}>
                                         <X size={14} />
                                     </Button>
                                 </div>
                                 <div className="w-96 overflow-hidden text-ellipsis whitespace-nowrap text-xs tracking-wider opacity-90">
-                                    {response.type === 'text' && response.message}
-                                    {response.type === 'image' && 'Image'}
+                                    {reply.type === 'text' && reply.message}
+                                    {reply.type === 'image' && 'Image'}
                                 </div>
                             </div>
                         )

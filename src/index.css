@@ -8,6 +8,7 @@
         --full-height-no-header: calc(100vh - var(--header-height));
         --std-padding: 2rem;
         --std-margin: 2rem;
+        --blur: rgb(101, 103, 107);
 
         --h1-font-size: 2.986rem;
         --h2-font-size: 2.488rem;

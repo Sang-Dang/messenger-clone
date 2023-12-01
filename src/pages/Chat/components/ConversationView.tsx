@@ -1,4 +1,5 @@
 import { ChatConverter } from '@/classes/Chat'
+import ReplyBasic from '@/classes/ReplyBasic'
 import { db } from '@/firebase'
 import useAppSelector from '@/lib/hooks/useAppSelector'
 import ChatHeader from '@/pages/Chat/components/common/ChatHeader'
@@ -27,15 +28,15 @@ export default function ConversationView() {
     return <ConversationViewData key={chatId} chatId={chatId} />
 }
 
-export type ResponseContextType = {
-    response: ChatResponse | null
-    setResponse: (response: ChatResponse | null) => void
-    resetResponse: () => void
+export type ReplyContextType = {
+    reply: ReplyBasic | null
+    setReply: (response: ReplyBasic | null) => void
+    resetReply: () => void
 }
-export const ResponseContext = createContext<ResponseContextType>({
-    response: null,
-    setResponse: () => {},
-    resetResponse: () => {}
+export const ReplyContext = createContext<ReplyContextType>({
+    reply: null,
+    setReply: () => {},
+    resetReply: () => {}
 })
 
 type ConversationViewDataType = {
@@ -43,10 +44,10 @@ type ConversationViewDataType = {
 }
 function ConversationViewData({ chatId }: ConversationViewDataType) {
     const [chat, loadingChat, errorChat] = useDocumentOnce(doc(db, 'chats', chatId).withConverter(ChatConverter))
-    const [isRespondingTo, setIsRespondingTo] = useState<ChatResponse | null>(null) // ! maybe move to global state instead if there are any problems
+    const [reply, setReply] = useState<ReplyBasic | null>(null) // ? maybe move to global state instead if there are any problems
 
-    const resetResponse = useCallback(() => {
-        setIsRespondingTo(null)
+    const resetReply = useCallback(() => {
+        setReply(null)
     }, [])
 
     if (loadingChat || !chat) {
@@ -60,11 +61,11 @@ function ConversationViewData({ chatId }: ConversationViewDataType) {
     const chatData = chat.data()!
 
     return (
-        <ResponseContext.Provider
+        <ReplyContext.Provider
             value={{
-                response: isRespondingTo,
-                setResponse: setIsRespondingTo,
-                resetResponse
+                reply,
+                setReply,
+                resetReply
             }}
         >
             <div className="flex h-full w-full flex-col">
@@ -72,6 +73,6 @@ function ConversationViewData({ chatId }: ConversationViewDataType) {
                 <MessagesViewContainer chatId={chatId} userIds={chat.data()?.users ?? []} className="h-1 flex-1" />
                 <MessageInputBox chatId={chatId} className="" />
             </div>
-        </ResponseContext.Provider>
+        </ReplyContext.Provider>
     )
 }

@@ -24,6 +24,7 @@ declare global {
     type ChatMessageTypes = 'text' | 'image'
 
     type ChatResponse = {
+        id: string
         userId: string
         message: string
         name: string
