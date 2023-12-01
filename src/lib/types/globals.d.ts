@@ -22,4 +22,11 @@ declare global {
     }
 
     type ChatMessageTypes = 'text' | 'image'
+
+    type ChatResponse = {
+        userId: string
+        message: string
+        name: string
+        type: ChatMessageTypes
+    }
 }

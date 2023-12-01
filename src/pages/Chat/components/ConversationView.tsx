@@ -6,6 +6,7 @@ import MessageInputBox from '@/pages/Chat/components/common/MessageInputBox'
 import MessagesViewContainer from '@/pages/Chat/components/common/MessagesViewContainer'
 import { doc } from 'firebase/firestore'
 import { MessagesSquare } from 'lucide-react'
+import { createContext, useCallback, useState } from 'react'
 import { useDocumentOnce } from 'react-firebase-hooks/firestore'
 
 export default function ConversationView() {
@@ -26,11 +27,27 @@ export default function ConversationView() {
     return <ConversationViewData key={chatId} chatId={chatId} />
 }
 
+export type ResponseContextType = {
+    response: ChatResponse | null
+    setResponse: (response: ChatResponse | null) => void
+    resetResponse: () => void
+}
+export const ResponseContext = createContext<ResponseContextType>({
+    response: null,
+    setResponse: () => {},
+    resetResponse: () => {}
+})
+
 type ConversationViewDataType = {
     chatId: string
 }
 function ConversationViewData({ chatId }: ConversationViewDataType) {
     const [chat, loadingChat, errorChat] = useDocumentOnce(doc(db, 'chats', chatId).withConverter(ChatConverter))
+    const [isRespondingTo, setIsRespondingTo] = useState<ChatResponse | null>(null) // ! maybe move to global state instead if there are any problems
+
+    const resetResponse = useCallback(() => {
+        setIsRespondingTo(null)
+    }, [])
 
     if (loadingChat || !chat) {
         return
@@ -43,10 +60,18 @@ function ConversationViewData({ chatId }: ConversationViewDataType) {
     const chatData = chat.data()!
 
     return (
-        <div className="flex h-full w-full flex-col">
-            <ChatHeader chat={chatData} className="" />
-            <MessagesViewContainer chatId={chatId} userIds={chat.data()?.users ?? []} className="h-1 flex-1" />
-            <MessageInputBox chatId={chatId} className="" />
-        </div>
+        <ResponseContext.Provider
+            value={{
+                response: isRespondingTo,
+                setResponse: setIsRespondingTo,
+                resetResponse
+            }}
+        >
+            <div className="flex h-full w-full flex-col">
+                <ChatHeader chat={chatData} className="" />
+                <MessagesViewContainer chatId={chatId} userIds={chat.data()?.users ?? []} className="h-1 flex-1" />
+                <MessageInputBox chatId={chatId} className="" />
+            </div>
+        </ResponseContext.Provider>
     )
 }

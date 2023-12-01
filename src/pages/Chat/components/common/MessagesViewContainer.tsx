@@ -33,7 +33,6 @@ export default function MessagesViewContainer({ className, chatId, userIds }: Me
     }, [messages])
 
     // get all users in current conversation
-
     const users = useAppSelector(selectUserInIdList(userIds))
 
     if (errorMessages) {
