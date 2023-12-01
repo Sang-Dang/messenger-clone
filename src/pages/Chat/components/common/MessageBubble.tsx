@@ -36,7 +36,7 @@ export default function MessageBubble({ data, sender, showAvatar = true }: Props
                     hasOnlyEmojis && 'p-0 py-6 text-5xl'
                 )}
             >
-                <span className="w-full hyphens-auto break-words text-white">{data.message}</span>
+                <pre className="w-full hyphens-auto whitespace-pre-wrap break-words font-sans text-white">{data.message}</pre>
             </div>
         </div>
     )

@@ -4,6 +4,7 @@ import { Toaster } from '@/components/ui'
 import { auth, db } from '@/firebase'
 import LoadingContextProvider from '@/lib/context/LoadingContext'
 import useMobile from '@/lib/hooks/useMobile'
+import { NextUIProvider } from '@nextui-org/react'
 import { doc, setDoc } from 'firebase/firestore'
 import { LucideComputer } from 'lucide-react'
 import { useRef } from 'react'
@@ -57,10 +58,12 @@ export default function RootLayout() {
 
     return (
         <>
-            <LoadingContextProvider>
-                <Toaster />
-                <Outlet />
-            </LoadingContextProvider>
+            <NextUIProvider>
+                <LoadingContextProvider>
+                    <Toaster />
+                    <Outlet />
+                </LoadingContextProvider>
+            </NextUIProvider>
         </>
     )
 }

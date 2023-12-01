@@ -1,8 +1,15 @@
+import { nextui } from '@nextui-org/react'
+
 /* eslint-disable no-undef */
 /** @type {import('tailwindcss').Config} */
 export default {
-    darkMode: ['class'],
-    content: ['./pages/**/*.{ts,tsx}', './components/**/*.{ts,tsx}', './app/**/*.{ts,tsx}', './src/**/*.{ts,tsx}'],
+    content: [
+        './pages/**/*.{ts,tsx}',
+        './components/**/*.{ts,tsx}',
+        './app/**/*.{ts,tsx}',
+        './src/**/*.{ts,tsx}',
+        './node_modules/@nextui-org/theme/dist/**/*.{js,ts,jsx,tsx}'
+    ],
     theme: {
         container: {
             center: true,
@@ -89,5 +96,6 @@ export default {
             }
         }
     },
-    plugins: [require('tailwindcss-animate')]
+    darkMode: 'class',
+    plugins: [require('tailwindcss-animate'), nextui()]
 }

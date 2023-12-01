@@ -20,4 +20,6 @@ declare global {
         activity: UserActivity
         lastActive: Date
     }
+
+    type ChatMessageTypes = 'text' | 'image'
 }
