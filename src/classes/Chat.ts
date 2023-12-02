@@ -52,7 +52,17 @@ export const ChatConverter = {
             data.chatName,
             (data.createdOn as Timestamp).toDate().toString(),
             lastMessage !== null
-                ? new Message(lastMessage.id, lastMessage.userId, lastMessage.message, (lastMessage.createdOn as Timestamp).toDate().toString())
+                ? // TODO OPTIMIZE THIS SHITTY ASS CODE
+                  new Message(
+                      lastMessage.id,
+                      lastMessage.userId,
+                      lastMessage.message,
+                      (lastMessage.createdOn as Timestamp).toDate().toString(),
+                      lastMessage.type,
+                      lastMessage.deletedOn,
+                      lastMessage.replyIds,
+                      lastMessage.repliedTo
+                  )
                 : null,
             (data.lastUpdatedOn as Timestamp).toDate().toString(),
             data.users.map((user: any) => user.id),

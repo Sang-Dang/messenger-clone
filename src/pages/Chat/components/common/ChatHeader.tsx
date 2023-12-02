@@ -6,6 +6,7 @@ import useAuth from '@/lib/hooks/useAuth'
 import { cn } from '@/lib/utils'
 import formatDistance from 'date-fns/formatDistance'
 import { ref } from 'firebase/database'
+import { LucideMoreVertical } from 'lucide-react'
 import { useListVals } from 'react-firebase-hooks/database'
 import { Helmet } from 'react-helmet'
 
@@ -66,7 +67,9 @@ export default function ChatHeader({ chat, className }: ChatHeaderProps) {
                         )
                     )}
                 </div>
-                <div>fdsfds</div>
+                <div>
+                    <LucideMoreVertical />
+                </div>
             </header>
         </>
     )
