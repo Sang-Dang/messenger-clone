@@ -139,9 +139,11 @@ function MessageOptions({ isHovered, isMe, data, sender, handleDeleteMessage }: 
                             </Button>
                         </PopoverTrigger>
                         <PopoverContent className="p-2">
-                            <Button type="button" variant="ghost" color="danger" onClick={() => handleDeleteMessage(data.id)}>
-                                Remove
-                            </Button>
+                            {isMe && (
+                                <Button type="button" variant="ghost" color="danger" onClick={() => handleDeleteMessage(data.id)}>
+                                    Remove
+                                </Button>
+                            )}
                         </PopoverContent>
                     </Popover>
                 </motion.div>

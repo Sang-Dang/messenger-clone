@@ -4,6 +4,7 @@ import { Separator } from '@/components/ui'
 import { selectUserInIdList } from '@/features/Users/UsersSelectors'
 import { db } from '@/firebase'
 import useAppSelector from '@/lib/hooks/useAppSelector'
+import useAuth from '@/lib/hooks/useAuth'
 import { cn } from '@/lib/utils'
 import MessageBubble from '@/pages/Chat/components/common/MessageBubble'
 import differenceInMinutes from 'date-fns/differenceInMinutes'
@@ -24,16 +25,20 @@ export default function MessagesViewContainer({ className, chatId, userIds }: Me
     const [messages, loadingMessages, errorMessages] = useCollectionData(
         query(collection(db, 'chats', chatId, 'messages'), orderBy('createdOn', 'asc')).withConverter(MessageConverter)
     )
+    const { user } = useAuth()
 
     const handleDeleteMessage = useCallback(
         (messageId: string) => {
             try {
+                if (messages?.find((m) => m.id === messageId)?.userId !== user.uid) {
+                    throw new Error('You are not allowed to delete this message.')
+                }
                 DeleteMessage(messageId, chatId)
             } catch (error) {
                 console.error(error)
             }
         },
-        [chatId]
+        [chatId, messages, user.uid]
     )
 
     const scrollRef = useRef<HTMLDivElement>(null)
