@@ -164,7 +164,7 @@ function ReplyCard({ className, repliedTo }: ReplyCardProps) {
                 <ReplyIcon className="mr-2 inline" size={12} />
                 You replied to <strong className="">{username}</strong>
             </div>
-            <div className="max-w-96 w-min overflow-hidden text-ellipsis whitespace-nowrap rounded-full bg-neutral-200/50 px-3 py-1 text-[13px] text-blur">
+            <div className="w-max max-w-[500px] overflow-hidden text-ellipsis whitespace-nowrap rounded-full bg-neutral-200/50 px-3 py-1 text-[13px] text-blur">
                 {repliedTo.type === 'deleted' && 'This message was deleted.'}
                 {repliedTo.type === 'image' && 'Image.'}
                 {repliedTo.type === 'text' && repliedTo.message}
