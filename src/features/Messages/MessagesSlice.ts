@@ -71,6 +71,16 @@ const MessagesSlice = createSlice({
                 state.status = 'failed'
                 state.error = action.error.message ?? null
             })
+            .addCase(getDocumentByOrder.pending, (state) => {
+                state.status = 'loading'
+            })
+            .addCase(getDocumentByOrder.fulfilled, (state) => {
+                state.status = 'idle'
+            })
+            .addCase(getDocumentByOrder.rejected, (state, action) => {
+                state.status = 'failed'
+                state.error = action.error.message ?? null
+            })
     }
 })
 
@@ -92,13 +102,13 @@ export const loadMessagesStart = createAsyncThunk(
 export const getDocumentByOrder = createAsyncThunk(
     'messages/getDocumentByOrder',
     async ({ chatId, index }: { chatId: string; index: number }, thunkAPI) => {
-        const q = query(collection(db, 'chats', chatId, 'messages').withConverter(MessageConverter), orderBy('createdOn', 'asc'), limit(index))
+        const q = query(collection(db, 'chats', chatId, 'messages').withConverter(MessageConverter), orderBy('createdOn', 'desc'), limit(index))
         const querySnapshot = await getDocs(q)
         const messages = querySnapshot.docs.map((doc) => doc.data() as Message)
         thunkAPI.dispatch(MessagesSlice.actions.setOldestMessage(messages[index].id))
     }
 )
 
-export const { messageAddedNew, messageUpdated, conversationLoaded, messagesAddedOld, selectChatId } = MessagesSlice.actions
+export const { messageAddedNew, messageUpdated, conversationLoaded, messagesAddedOld, selectChatId, setOldestMessage } = MessagesSlice.actions
 const MessagesReducer = MessagesSlice.reducer
 export default MessagesReducer

@@ -10,7 +10,6 @@ export async function CreateChat(users: string[], chatName?: string, chatAvatar?
 
     const chat = new Chat('', chatName ?? '', Timestamp.now().toDate().toString(), null, Timestamp.now().toDate().toString(), users, '')
     const docRef = await addDoc(collection(db, 'chats').withConverter(ChatConverter), chat)
-    console.log(chatAvatar)
     if (chatAvatar) {
         const avatarRef = ref(storage, `chatAvatars/${docRef.id}`)
         const avatar = await uploadBytes(avatarRef, chatAvatar)

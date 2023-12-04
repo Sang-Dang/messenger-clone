@@ -7,6 +7,7 @@ import useAuth from '@/lib/hooks/useAuth'
 import { cn } from '@/lib/utils'
 import useReply from '@/pages/Chat/hooks/useResponse'
 import { Button, Popover, PopoverContent, PopoverTrigger } from '@nextui-org/react'
+import format from 'date-fns/format'
 import { AnimatePresence, motion } from 'framer-motion'
 import { MoreVertical, Reply, ReplyIcon, Smile } from 'lucide-react'
 import { useState } from 'react'
@@ -97,7 +98,7 @@ function MessageOptions({ isHovered, isMe, data, sender, handleDeleteMessage }: 
                         opacity: 0,
                         scale: 0.9
                     }}
-                    className={cn('absolute flex gap-1', isMe ? 'right-full mr-3 flex-row-reverse' : 'left-full ml-3')}
+                    className={cn('absolute flex items-center gap-1', isMe ? 'right-full mr-3 flex-row-reverse' : 'left-full ml-3')}
                 >
                     <Button
                         variant="solid"
@@ -146,6 +147,7 @@ function MessageOptions({ isHovered, isMe, data, sender, handleDeleteMessage }: 
                             )}
                         </PopoverContent>
                     </Popover>
+                    <div className="ml-5 w-max text-xs font-light">{format(new Date(data.createdOn), 'dd/MM/yyyy HH:mm:ss')}</div>
                 </motion.div>
             )}
         </AnimatePresence>
