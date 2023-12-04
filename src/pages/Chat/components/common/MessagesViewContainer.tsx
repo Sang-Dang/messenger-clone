@@ -9,7 +9,7 @@ import { cn } from '@/lib/utils'
 import MessageBubble from '@/pages/Chat/components/common/MessageBubble'
 import differenceInMinutes from 'date-fns/differenceInMinutes'
 import format from 'date-fns/format'
-import { collection, orderBy, query } from 'firebase/firestore'
+import { collection, orderBy, query, startAfter } from 'firebase/firestore'
 import { MessageSquare } from 'lucide-react'
 import { Fragment, useCallback, useEffect, useRef } from 'react'
 import { useCollectionData } from 'react-firebase-hooks/firestore'
@@ -23,9 +23,10 @@ type MessagesViewContainerProps = {
 export default function MessagesViewContainer({ className, chatId, userIds }: MessagesViewContainerProps) {
     // get conversation messages
     const [messages, loadingMessages, errorMessages] = useCollectionData(
-        query(collection(db, 'chats', chatId, 'messages'), orderBy('createdOn', 'asc')).withConverter(MessageConverter)
+        query(collection(db, 'chats', chatId, 'messages'), orderBy('createdOn', 'asc'), startAfter('')).withConverter(MessageConverter)
     )
     const { user } = useAuth()
+    const scrollRef = useRef<HTMLDivElement>(null)
 
     const handleDeleteMessage = useCallback(
         (messageId: string) => {
@@ -41,7 +42,20 @@ export default function MessagesViewContainer({ className, chatId, userIds }: Me
         [chatId, messages, user.uid]
     )
 
-    const scrollRef = useRef<HTMLDivElement>(null)
+    useEffect(() => {
+        function handleLoadMoreMessages(e: Event) {
+            if ((e.target as HTMLDivElement).scrollTop === 0) {
+                console.log('fetching more messages')
+            }
+        }
+
+        const currentRef = scrollRef.current
+        currentRef && currentRef.addEventListener('scroll', handleLoadMoreMessages)
+
+        return () => {
+            currentRef && currentRef.removeEventListener('scroll', handleLoadMoreMessages)
+        }
+    }, [])
 
     useEffect(() => {
         scrollRef.current?.scrollTo({

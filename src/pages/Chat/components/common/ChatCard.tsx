@@ -1,7 +1,7 @@
 import { Chat } from '@/classes/Chat'
 import { Message } from '@/classes/Message'
 import { Avatar, AvatarFallback, AvatarImage, DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui'
-import { setChatId } from '@/features/Conversation/ConversationSlice'
+import { selectChatId } from '@/features/Messages/MessagesSlice'
 import { selectUserById } from '@/features/Users/UsersSelectors'
 import { storage } from '@/firebase'
 import useAppDispatch from '@/lib/hooks/useAppDispatch'
@@ -42,13 +42,9 @@ type ChatCardViewProps = {
 }
 const ChatCardView = memo(({ id, chatName, avatar, lastMessage }: ChatCardViewProps) => {
     const dispatch = useAppDispatch()
-    const selectedChatCard = useAppSelector((state) => state.conversation.value.chatId)
+    const selectedChatCard = useAppSelector((state) => state.messages.value.chatId)
     function handleChangeChat() {
-        dispatch(
-            setChatId({
-                chatId: id
-            })
-        )
+        dispatch(selectChatId(id))
     }
 
     return (

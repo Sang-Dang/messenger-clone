@@ -1,5 +1,6 @@
 import { ChatConverter } from '@/classes/Chat'
 import ReplyBasic from '@/classes/ReplyBasic'
+import { SelectChatId } from '@/features/Messages/MessagesSelectors'
 import { db } from '@/firebase'
 import useAppSelector from '@/lib/hooks/useAppSelector'
 import ChatHeader from '@/pages/Chat/components/common/ChatHeader'
@@ -7,11 +8,11 @@ import MessageInputBox from '@/pages/Chat/components/common/MessageInputBox'
 import MessagesViewContainer from '@/pages/Chat/components/common/MessagesViewContainer'
 import { doc } from 'firebase/firestore'
 import { MessagesSquare } from 'lucide-react'
-import { createContext, useCallback, useState } from 'react'
+import { createContext, useState } from 'react'
 import { useDocumentOnce } from 'react-firebase-hooks/firestore'
 
 export default function ConversationView() {
-    const chatId = useAppSelector((state) => state.conversation.value.chatId)
+    const chatId = useAppSelector(SelectChatId)
 
     if (!chatId) {
         return (
@@ -39,16 +40,13 @@ export const ReplyContext = createContext<ReplyContextType>({
     resetReply: () => {}
 })
 
+// divide it out because you can't render hooks conditionally like wtf
 type ConversationViewDataType = {
     chatId: string
 }
 function ConversationViewData({ chatId }: ConversationViewDataType) {
     const [chat, loadingChat, errorChat] = useDocumentOnce(doc(db, 'chats', chatId).withConverter(ChatConverter))
     const [reply, setReply] = useState<ReplyBasic | null>(null) // ? maybe move to global state instead if there are any problems
-
-    const resetReply = useCallback(() => {
-        setReply(null)
-    }, [])
 
     if (loadingChat || !chat) {
         return
@@ -65,7 +63,7 @@ function ConversationViewData({ chatId }: ConversationViewDataType) {
             value={{
                 reply,
                 setReply,
-                resetReply
+                resetReply: () => setReply(null)
             }}
         >
             <div className="flex h-full w-full flex-col">
