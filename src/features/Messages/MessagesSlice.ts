@@ -1,5 +1,7 @@
-import { Message } from '@/classes/Message'
-import { PayloadAction, createSlice } from '@reduxjs/toolkit'
+import { Message, MessageConverter } from '@/classes/Message'
+import { db } from '@/firebase'
+import { PayloadAction, createAsyncThunk, createSlice } from '@reduxjs/toolkit'
+import { collection, getDocs, limit, orderBy, query } from 'firebase/firestore'
 
 type initialStateType = {
     value: {
@@ -7,16 +9,22 @@ type initialStateType = {
         messageIds: {
             [id: string]: number
         }
+    }
+    metadata: {
         chatId: string | null
+        oldestMessageId: string
     }
     status: 'idle' | 'loading' | 'failed'
     error: string | null
 }
 const initialState: initialStateType = {
     value: {
-        chatId: null,
         messages: [], // sorted array. add to end to add to bottom of chat,
         messageIds: {} // map of message id to index in messages array
+    },
+    metadata: {
+        oldestMessageId: '',
+        chatId: null
     },
     status: 'idle',
     error: null
@@ -45,10 +53,51 @@ const MessagesSlice = createSlice({
             })
         },
         selectChatId: (state, action: PayloadAction<string>) => {
-            state.value.chatId = action.payload
+            state.metadata.chatId = action.payload
+        },
+        setOldestMessage: (state, action: PayloadAction<string>) => {
+            state.metadata.oldestMessageId = action.payload
         }
+    },
+    extraReducers: (builder) => {
+        builder
+            .addCase(loadMessagesStart.pending, (state) => {
+                state.status = 'loading'
+            })
+            .addCase(loadMessagesStart.fulfilled, (state) => {
+                state.status = 'idle'
+            })
+            .addCase(loadMessagesStart.rejected, (state, action) => {
+                state.status = 'failed'
+                state.error = action.error.message ?? null
+            })
     }
 })
+
+/**
+ * Load messages
+ *
+ * Used for loading messages on CHAT START only. After chat start,
+ */
+export const loadMessagesStart = createAsyncThunk(
+    'messages/loadMessagesStart',
+    async ({ chatId, limitNo }: { chatId: string; limitNo: number }, thunkAPI) => {
+        const q = query(collection(db, 'chats', chatId, 'messages').withConverter(MessageConverter), orderBy('createdOn', 'asc'), limit(limitNo))
+        const querySnapshot = await getDocs(q)
+        const messages = querySnapshot.docs.map((doc) => doc.data() as Message)
+        thunkAPI.dispatch(MessagesSlice.actions.conversationLoaded(messages))
+    }
+)
+
+export const getDocumentByOrder = createAsyncThunk(
+    'messages/getDocumentByOrder',
+    async ({ chatId, index }: { chatId: string; index: number }, thunkAPI) => {
+        const q = query(collection(db, 'chats', chatId, 'messages').withConverter(MessageConverter), orderBy('createdOn', 'asc'), limit(index))
+        const querySnapshot = await getDocs(q)
+        const messages = querySnapshot.docs.map((doc) => doc.data() as Message)
+        thunkAPI.dispatch(MessagesSlice.actions.setOldestMessage(messages[index].id))
+    }
+)
 
 export const { messageAddedNew, messageUpdated, conversationLoaded, messagesAddedOld, selectChatId } = MessagesSlice.actions
 const MessagesReducer = MessagesSlice.reducer
