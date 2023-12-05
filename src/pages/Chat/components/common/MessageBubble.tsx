@@ -1,7 +1,10 @@
+import { ToggleReaction } from '@/api/messages/ToggleReaction'
 import { Message } from '@/classes/Message'
 import ReplyBasic from '@/classes/ReplyBasic'
 import { User } from '@/classes/User'
+import ReactionSelector from '@/components/ReactionSelector'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui'
+import { SelectChatId } from '@/features/Messages/MessagesSelectors'
 import { storage } from '@/firebase'
 import useAppSelector from '@/lib/hooks/useAppSelector'
 import useAuth from '@/lib/hooks/useAuth'
@@ -14,6 +17,7 @@ import { AnimatePresence, motion } from 'framer-motion'
 import { MoreVertical, Reply, ReplyIcon, Smile } from 'lucide-react'
 import { useState } from 'react'
 import { useDownloadURL } from 'react-firebase-hooks/storage'
+import { ReactionsTag } from './ReactionsTag'
 
 type Props = {
     data: Message
@@ -74,6 +78,9 @@ export default function MessageBubble({ data, sender, showAvatar = true, handleD
                 {data.type === 'image' && (
                     <ImageViewContainer isHovered={isHovered} isMe={isMe} data={data} sender={sender} handleDeleteMessage={handleDeleteMessage} />
                 )}
+                {data.reactions && Object.keys(data.reactions).length !== 0 && (
+                    <ReactionsTag reactions={data.reactions} className={cn('relative z-30 -translate-y-1/4', isMe && 'text-right')} />
+                )}
             </div>
         </div>
     )
@@ -128,6 +135,14 @@ type MessageOptionsProps = {
 }
 function MessageOptions({ isHovered, isMe, data, sender, handleDeleteMessage }: MessageOptionsProps) {
     const { setReply } = useReply()
+    const { user } = useAuth()
+    const chatId = useAppSelector(SelectChatId)
+
+    function handleReaction(reaction: string) {
+        if (chatId) {
+            ToggleReaction(chatId, data.id, user.uid, reaction)
+        }
+    }
 
     return (
         <AnimatePresence>
@@ -147,15 +162,17 @@ function MessageOptions({ isHovered, isMe, data, sender, handleDeleteMessage }: 
                     }}
                     className={cn('absolute flex items-center gap-1', isMe ? 'right-full mr-3 flex-row-reverse' : 'left-full ml-3')}
                 >
-                    <Button
-                        variant="solid"
-                        isIconOnly
-                        color="secondary"
-                        className="grid aspect-square h-8 w-8 min-w-0 place-items-center p-0"
-                        disableRipple
-                    >
-                        <Smile size={16} />
-                    </Button>
+                    <ReactionSelector handleSelectReaction={handleReaction}>
+                        <Button
+                            variant="solid"
+                            isIconOnly
+                            color="secondary"
+                            className="grid aspect-square h-8 w-8 min-w-0 place-items-center p-0"
+                            disableRipple
+                        >
+                            <Smile size={16} />
+                        </Button>
+                    </ReactionSelector>
                     <Button
                         variant="solid"
                         color="secondary"
@@ -194,7 +211,9 @@ function MessageOptions({ isHovered, isMe, data, sender, handleDeleteMessage }: 
                             )}
                         </PopoverContent>
                     </Popover>
-                    <div className="ml-5 w-max text-xs font-light">{format(new Date(data.createdOn), 'dd/MM/yyyy HH:mm:ss')}</div>
+                    <div className={cn('w-max text-xs font-light', isMe ? 'mr-3' : 'ml-3    ')}>
+                        {format(new Date(data.createdOn), 'dd/MM/yyyy HH:mm:ss')}
+                    </div>
                 </motion.div>
             )}
         </AnimatePresence>
@@ -225,6 +244,4 @@ function ReplyCard({ className, repliedTo }: ReplyCardProps) {
             </div>
         </div>
     )
-
-    // TODO SHOW IMAGE
 }

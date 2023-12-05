@@ -14,7 +14,12 @@ export async function DeleteMessage(messageId: string, chatId: string) {
                 const replyRef = doc(db, 'chats', chatId, 'messages', reply)
                 transaction.update(replyRef, {
                     'repliedTo.message': '',
-                    'repliedTo.type': 'deleted'
+                    'repliedTo.type': 'deleted',
+                    reactions: {
+                        data: {},
+                        count: {}
+                    }
+                    // TODO FIX
                 })
             })
         }

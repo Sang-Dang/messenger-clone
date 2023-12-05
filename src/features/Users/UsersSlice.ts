@@ -3,10 +3,12 @@ import { db } from '@/firebase'
 import { PayloadAction, createAsyncThunk, createSlice } from '@reduxjs/toolkit'
 import { collection, documentId, getDocs, query, where } from 'firebase/firestore'
 
+export type usersObj = {
+    [key: string]: User
+}
+
 type UsersSliceType = {
-    users: {
-        [key: string]: User
-    }
+    users: usersObj
     userIds: string[]
     status: 'idle' | 'loading' | 'failed'
     error: string | null

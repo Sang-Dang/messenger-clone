@@ -1,6 +1,15 @@
 import ReplyBasic from '@/classes/ReplyBasic'
 import { FirestoreDataConverter, QueryDocumentSnapshot, SnapshotOptions, Timestamp } from 'firebase/firestore'
 
+export type reactionsType = {
+    data: {
+        [userid: string]: string
+    }
+    count: {
+        [reaction: string]: number
+    }
+}
+
 export class Message {
     id: string
     userId: string
@@ -10,6 +19,7 @@ export class Message {
     deletedOn: string | null = null
     replyIds: string[] = []
     repliedTo: ReplyBasic | null = null
+    reactions: reactionsType
 
     constructor(
         id: string,
@@ -19,7 +29,8 @@ export class Message {
         type: ChatMessageTypes,
         deletedOn: string | null = null,
         replies: string[] = [],
-        repliedTo: ReplyBasic | null = null
+        repliedTo: ReplyBasic | null = null,
+        reactions?: reactionsType
     ) {
         this.id = id
         this.userId = userId
@@ -29,6 +40,10 @@ export class Message {
         this.deletedOn = deletedOn
         this.replyIds = replies
         this.repliedTo = repliedTo
+        this.reactions = reactions ?? {
+            count: {},
+            data: {}
+        }
     }
 }
 
@@ -41,7 +56,8 @@ export const MessageConverter: FirestoreDataConverter<Message> = {
             type: message.type,
             deletedOn: message.deletedOn ? Timestamp.fromDate(new Date(message.deletedOn)) : null,
             replyIds: message.replyIds,
-            repliedTo: message.repliedTo
+            repliedTo: message.repliedTo,
+            reactions: message.reactions
         }
     },
     fromFirestore: (snapshot: QueryDocumentSnapshot, options: SnapshotOptions) => {
@@ -56,7 +72,8 @@ export const MessageConverter: FirestoreDataConverter<Message> = {
             type: data.type,
             deletedOn: data.deletedOn ? (data.deletedOn as Timestamp).toDate().toString() : null,
             replyIds: data.replyIds,
-            repliedTo: data.repliedTo === null ? null : ({ ...data.repliedTo } as ReplyBasic)
+            repliedTo: data.repliedTo === null ? null : ({ ...data.repliedTo } as ReplyBasic),
+            reactions: data.reactions
         } as Message
     }
 }

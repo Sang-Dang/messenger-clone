@@ -16,6 +16,17 @@ export const selectUserInIdList = (idList: string[]): selectUserInIdListReturn =
             .map(([, value]) => value)
     })
 
+type selectUserInIdListObjectReturn = (state: RootState) => {
+    [id: string]: User
+}
+export const selectUserInIdListObject = (idList: string[]): selectUserInIdListObjectReturn =>
+    createSelector([(state: RootState) => state.users.users], (users: { [key: string]: User }) => {
+        return Object.entries(users)
+            .filter(([key]) => idList.includes(key))
+            .map(([id, currUser]) => ({ [id]: currUser }))
+            .reduce((arr, curr) => ({ ...arr, ...curr }), {})
+    })
+
 export const selectUserStatus = (state: RootState) => state.users.status
 export const selectUsersList = (state: RootState) => state.users.users
 export const selectUserIds = (state: RootState) => state.users.userIds
