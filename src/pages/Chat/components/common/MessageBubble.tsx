@@ -147,7 +147,9 @@ function MessageOptions({ isHovered, isMe, data, sender, handleDeleteMessage }: 
                             )}
                         </PopoverContent>
                     </Popover>
-                    <div className="ml-5 w-max text-xs font-light">{format(new Date(data.createdOn), 'dd/MM/yyyy HH:mm:ss')}</div>
+                    <div className={cn('ml-5 w-max text-xs font-light', isMe && 'mr-5')}>
+                        {format(new Date(data.createdOn), 'dd/MM/yyyy HH:mm:ss')}
+                    </div>
                 </motion.div>
             )}
         </AnimatePresence>

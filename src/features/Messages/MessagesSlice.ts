@@ -34,8 +34,10 @@ const MessagesSlice = createSlice({
     initialState,
     reducers: {
         messagesAddedOld: (state, action: PayloadAction<Message>) => {
-            state.value.messages.unshift(action.payload)
-            state.value.messageIds[action.payload.id] = 0
+            if (state.value.messageIds[action.payload.id] === undefined) {
+                state.value.messages.push(action.payload)
+                state.value.messageIds[action.payload.id] = state.value.messages.length - 1
+            }
         },
         messageAddedNew: (state, action: PayloadAction<Message>) => {
             state.value.messages.push(action.payload)
