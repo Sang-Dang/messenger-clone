@@ -88,13 +88,13 @@ export default function TitleCard() {
                 width={50}
                 className="h-50 w-50 object-cover transition-all"
             />
-            <p className="flex text-2xl font-extrabold tracking-wider">
+            <div className="flex text-2xl font-extrabold tracking-wider">
                 {APP_NAME.split('').map((letter, index) => (
                     <motion.p variants={textVariants} animate={currentElement === index ? 'hover' : 'idle'} key={letter + '' + index}>
                         {letter}
                     </motion.p>
                 ))}
-            </p>
+            </div>
         </h1>
     )
 }

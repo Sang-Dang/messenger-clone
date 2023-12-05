@@ -52,8 +52,8 @@ function ChatListView({ chats }: ChatListViewProps) {
             />
             <ScrollArea className="flex-grow overflow-y-auto px-3">
                 {chats.map((cur) => (
-                    <div className="my-2 first-of-type:mt-0 last-of-type:mb-0">
-                        <ChatCard key={cur.id} chat={cur} />
+                    <div key={cur.id} className="my-2 first-of-type:mt-0 last-of-type:mb-0">
+                        <ChatCard chat={cur} />
                     </div>
                 ))}
             </ScrollArea>

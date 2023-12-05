@@ -1,11 +1,12 @@
 import { CreateMessage } from '@/api/messages'
 import EmojiSelector from '@/components/EmojiSelector'
+import ImageUploadButton from '@/components/ImageUploadButton'
 import { Button } from '@/components/ui'
 import useAuth from '@/lib/hooks/useAuth'
 import { cn } from '@/lib/utils'
 import useReply from '@/pages/Chat/hooks/useResponse'
 import { Textarea } from '@nextui-org/react'
-import { Image, PlusIcon, Send, Smile, X } from 'lucide-react'
+import { PlusIcon, Send, Smile, X } from 'lucide-react'
 import { useCallback, useEffect, useRef, useState } from 'react'
 
 type MessageInputBoxType = {
@@ -18,18 +19,20 @@ export default function MessageInputBox({ chatId, className }: MessageInputBoxTy
     const [isFocused, setIsFocused] = useState(false)
     const inputRef = useRef<HTMLTextAreaElement>(null)
     const { reply, setReply, resetReply } = useReply()
+    const [inputImages, setInputImages] = useState<FileList | null>(null)
 
     const handleSubmit = useCallback(() => {
-        if (user && messageInput.trim()) {
+        if ((user && messageInput.trim()) || inputImages) {
             try {
-                CreateMessage(user.uid, messageInput.trim(), chatId, 'text', reply ?? undefined)
+                CreateMessage(user.uid, messageInput.trim(), chatId, 'text', reply ?? undefined, inputImages ?? undefined)
             } catch (error) {
                 console.log(error)
             }
         }
         setMessageInput('')
+        setInputImages(null)
         resetReply()
-    }, [chatId, messageInput, reply, resetReply, user])
+    }, [chatId, inputImages, messageInput, reply, resetReply, user])
 
     function handleChange(value: string) {
         if (value !== '\n') setMessageInput(value)
@@ -56,34 +59,56 @@ export default function MessageInputBox({ chatId, className }: MessageInputBoxTy
             <Button variant="default" className="mr-1 aspect-square h-10 rounded-full p-1">
                 <PlusIcon size={16} />
             </Button>
-            <Button variant="ghost" className="mr-1 aspect-square h-10 rounded-full p-1">
-                <Image size={16} />
-            </Button>
+            <ImageUploadButton
+                onChange={(files) => {
+                    setInputImages(files)
+                }}
+            />
             <div className="relative flex-grow">
                 <Textarea
                     ref={inputRef}
                     classNames={{
-                        inputWrapper: 'rounded-3xl relative z-0 h-auto min-h-full bg-neutral-200/70 pr-10 leading-loose focus-visible:ring-0'
+                        inputWrapper: 'rounded-3xl relative z-0 h-auto min-h-full bg-neutral-200/70 pr-10 leading-loose focus-visible:ring-0',
+                        label: 'w-full cursor-default'
                     }}
                     onClear={() => setMessageInput('')}
                     placeholder="Aa"
                     label={
-                        reply && ( // has response
-                            <div className="flex flex-col gap-0">
-                                <div className="flex items-center gap-1 ">
-                                    <span>
-                                        Responding to <strong className="font-bold">{reply.userId === user.uid ? 'Yourself' : reply.username}</strong>
-                                    </span>
-                                    <Button variant="ghost" className="h-min p-0 leading-[0] tracking-[0]" onClick={() => setReply(null)}>
-                                        <X size={14} />
-                                    </Button>
+                        <div className="flex h-full flex-col gap-3">
+                            {reply && ( // has response
+                                <div className="inline-flex w-min flex-col gap-0 rounded-3xl bg-neutral-300/50 p-3">
+                                    <div className="flex w-full min-w-max items-center justify-between gap-1">
+                                        <span className="">
+                                            Responding to{' '}
+                                            <strong className="font-bold">{reply.userId === user.uid ? 'Yourself' : reply.username}</strong>
+                                        </span>
+                                        <Button
+                                            variant="ghost"
+                                            className="ml-5 h-min cursor-pointer p-0 leading-[0] tracking-[0]"
+                                            onClick={() => setReply(null)}
+                                        >
+                                            <X size={16} className="scale-100" />
+                                        </Button>
+                                    </div>
+                                    <div className="max-w-[300px] overflow-hidden text-ellipsis whitespace-nowrap text-xs tracking-wider opacity-90">
+                                        {reply.type === 'text' && reply.message}
+                                        {reply.type === 'image' && 'Image'}
+                                    </div>
                                 </div>
-                                <div className="w-96 overflow-hidden text-ellipsis whitespace-nowrap text-xs tracking-wider opacity-90">
-                                    {reply.type === 'text' && reply.message}
-                                    {reply.type === 'image' && 'Image'}
+                            )}
+                            {inputImages && inputImages.length >= 1 && (
+                                <div className="mt-2 inline-flex h-full gap-2">
+                                    {Array.from(inputImages).map((img) => (
+                                        <img
+                                            src={URL.createObjectURL(img)}
+                                            alt=""
+                                            key={img.name}
+                                            className="aspect-square h-16 rounded-2xl object-cover"
+                                        />
+                                    ))}
                                 </div>
-                            </div>
-                        )
+                            )}
+                        </div>
                     }
                     labelPlacement="inside"
                     value={messageInput}
