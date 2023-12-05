@@ -1,1 +1,3 @@
-export default function Test() {}
+export default function Test() {
+    return <></>
+}
