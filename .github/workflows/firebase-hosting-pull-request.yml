@@ -21,23 +21,6 @@ jobs:
               run: pnpm install --no-frozen-lockfile
             - name: Build
               run: pnpm run build
-            - name: Archive Build
-              uses: actions/upload-artifact@v2
-              with:
-                  name: build
-                  path: build
-    deploy:
-        name: Deploy
-        needs: build
-        runs-on: ubuntu-latest
-
-        steps:
-            - uses: actions/checkout@v2
-            - name: Download Build
-              uses: actions/download-artifact@v2
-              with:
-                  name: build
-                  path: build
             - uses: actions/checkout@v2
             - uses: lowply/deploy-firebase@v0.0.5
               env:
