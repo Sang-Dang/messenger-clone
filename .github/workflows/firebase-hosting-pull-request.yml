@@ -2,15 +2,8 @@ name: Firebase Deploy
 run-name: Deploy to Firebase Hosting
 on: [push]
 jobs:
-    install:
-        runs-on: ubuntu-latest
-        steps:
-            - uses: actions/checkout@v2
-            - name: Install Dependencies
-              run: pnpm install
     build:
         runs-on: ubuntu-latest
-        needs: install
         steps:
             - name: Build
               run: pnpm build
