@@ -4,12 +4,24 @@ on: [push]
 jobs:
     build:
         runs-on: ubuntu-latest
+        strategy:
+            matrix:
+                node-version: [15]
         steps:
+            - uses: actions/checkout@v3
+            - uses: pnpm/action-setup@v2
+              with:
+                  version: 8
+            - name: Use Node.js ${{ matrix.node-version }}
+              uses: actions/setup-node@v3
+              with:
+                  node-version: ${{ matrix.node-version }}
+                  cache: 'pnpm'
+            - name: Install dependencies
+              run: pnpm install
             - name: Build
-              run: pnpm build
-    deploy:
-        runs-on: ubuntu-latest
-        needs: build
-        steps:
-            - name: Deploy to Firebase Hosting
-              run: firebase deploy
+              run: pnpm run build
+            - name: Deploy
+              uses: w9jds/firebase-action@master
+              with:
+                  args: deploy --only hosting
