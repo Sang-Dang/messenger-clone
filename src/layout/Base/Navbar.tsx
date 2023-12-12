@@ -38,7 +38,7 @@ const Navbar = () => {
             <nav className="flex gap-5">
                 <TooltipProvider>
                     <Tooltip>
-                        <TooltipTrigger>
+                        <TooltipTrigger asChild>
                             <Button variant={location.pathname === '/' ? 'secondary' : 'ghost'} onClick={() => navigate('/')}>
                                 <Home />
                             </Button>
@@ -50,7 +50,7 @@ const Navbar = () => {
                 </TooltipProvider>
                 <TooltipProvider>
                     <Tooltip>
-                        <TooltipTrigger>
+                        <TooltipTrigger asChild>
                             <Button variant={location.pathname === '/chat' ? 'secondary' : 'ghost'} onClick={() => navigate('/chat')}>
                                 <MessageCircle />
                             </Button>
@@ -62,7 +62,7 @@ const Navbar = () => {
                 </TooltipProvider>
                 <TooltipProvider>
                     <Tooltip>
-                        <TooltipTrigger>
+                        <TooltipTrigger asChild>
                             <Button variant={location.pathname === '/profile' ? 'secondary' : 'ghost'} onClick={() => navigate('/profile')}>
                                 <User />
                             </Button>

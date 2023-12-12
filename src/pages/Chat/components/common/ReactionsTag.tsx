@@ -36,7 +36,7 @@ export function ReactionsTag({ className, reactions }: ReactionsTagType) {
             >
                 <div
                     onClick={onOpen}
-                    className={cn('flex h-full w-max cursor-pointer items-center rounded-3xl bg-neutral-200 p-1 text-sm shadow-2xl', className)}
+                    className={cn('flex w-max cursor-pointer items-center rounded-3xl bg-neutral-200 p-[1px] text-sm shadow-2xl', className)}
                 >
                     {uniqueReactions.map((react) => react)}
                     {uniqueReactions.length > 1 && <div className="ml-1 text-xs">{uniqueReactions.length}</div>}

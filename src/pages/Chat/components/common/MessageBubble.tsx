@@ -13,11 +13,13 @@ import useReply from '@/pages/Chat/hooks/useResponse'
 import { Button, Popover, PopoverContent, PopoverTrigger } from '@nextui-org/react'
 import format from 'date-fns/format'
 import { ref } from 'firebase/storage'
-import { AnimatePresence, motion } from 'framer-motion'
+import { AnimatePresence, motion, useInView } from 'framer-motion'
 import { MoreVertical, Reply, ReplyIcon, Smile } from 'lucide-react'
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useDownloadURL } from 'react-firebase-hooks/storage'
 import { ReactionsTag } from './ReactionsTag'
+import { SeenMessage } from '@/api/messages/SeenMessage'
+import { selectUserInIdList } from '@/features/Users/UsersSelectors'
 
 type Props = {
     data: Message
@@ -28,59 +30,93 @@ type Props = {
 export default function MessageBubble({ data, sender, showAvatar = true, handleDeleteMessage }: Props) {
     const { user } = useAuth()
     const [isHovered, setIsHovered] = useState(false)
+    const chatId = useAppSelector(SelectChatId)!
     const isMe = sender.id === user.uid
     const isAvatarShown = showAvatar && !isMe
     const hasOnlyEmojis = onlyEmojis(data.message)
+    const mainRef = useRef<HTMLDivElement>(null)
+    const isInView = useInView(mainRef)
+
+    useEffect(() => {
+        async function onFocus() {
+            if (!data.seenBy.includes(user.uid) && isInView) {
+                await SeenMessage(data.id, user.uid, chatId)
+            }
+        }
+
+        onFocus()
+    }, [chatId, data.id, data.seenBy, user.uid, isInView])
 
     function onlyEmojis(string: string) {
         return [...string].every((char) => /[\p{Emoji}]/u.test(char) && !/^\d$/.test(char))
     }
 
     return (
-        <div
-            onMouseOver={() => setIsHovered(true)}
-            onMouseLeave={() => setIsHovered(false)}
-            className={cn('flex items-end gap-3', isMe && 'flex-row-reverse', !isAvatarShown && 'mb-[2px]', isAvatarShown && 'mb-3')}
-        >
-            {isAvatarShown && (
-                <Avatar className="aspect-square h-full w-[40px]">
-                    <AvatarImage src={sender.avatar} alt="avatar" className="h-full w-full" />
-                    <AvatarFallback>{sender.name}</AvatarFallback>
-                </Avatar>
-            )}
-            <div className={cn('flex flex-col items-start', !isAvatarShown && 'ml-[52px]', isMe && 'ml-0 mr-[10px] items-end')}>
-                {data.repliedTo && (
-                    <ReplyCard
-                        repliedTo={data.repliedTo!}
-                        className={cn('relative z-10 mt-3 flex flex-col items-start', isMe && 'items-end text-right')}
-                    />
+        <div className="relative">
+            <div
+                ref={mainRef}
+                onMouseOver={() => setIsHovered(true)}
+                onMouseLeave={() => setIsHovered(false)}
+                className={cn('flex items-end gap-3', isMe && 'flex-row-reverse', !isAvatarShown && 'mb-[2px]', isAvatarShown && 'mb-3')}
+            >
+                {isAvatarShown && (
+                    <Avatar className="aspect-square h-full w-[40px]">
+                        <AvatarImage src={sender.avatar} alt="avatar" className="h-full w-full" />
+                        <AvatarFallback>{sender.name}</AvatarFallback>
+                    </Avatar>
                 )}
-                {data.type === 'deleted' && (
-                    <div className="relative z-20 inline-flex w-max max-w-[500px] items-center rounded-2xl border-2 border-neutral-300 bg-transparent p-3 font-[400]">
-                        <pre className="relative z-20 w-full hyphens-auto whitespace-pre-wrap break-words font-sans text-neutral-500">
-                            This message was deleted.
-                        </pre>
-                    </div>
-                )}
-                {data.type === 'text' && (
-                    <div
-                        className={cn(
-                            'relative z-20 inline-flex w-max max-w-[500px] items-center rounded-2xl p-3 font-[400]',
-                            !hasOnlyEmojis && 'bg-blue-500',
-                            hasOnlyEmojis && 'p-0 pb-2 text-5xl'
+                <div
+                    className={cn('relative flex flex-grow flex-col items-start', !isAvatarShown && 'ml-[52px]', isMe && 'ml-0 mr-[10px] items-end')}
+                >
+                    {data.repliedTo && (
+                        <ReplyCard
+                            repliedTo={data.repliedTo!}
+                            className={cn('relative z-10 mt-3 flex flex-col items-start', isMe && 'items-end text-right')}
+                        />
+                    )}
+                    {data.type === 'deleted' && (
+                        <div className="relative z-20 inline-flex w-max max-w-[500px] items-center rounded-2xl border-2 border-neutral-300 bg-transparent p-3 font-[400]">
+                            <pre className="relative z-20 w-full hyphens-auto whitespace-pre-wrap break-words font-sans text-neutral-500">
+                                This message was deleted.
+                            </pre>
+                        </div>
+                    )}
+                    <div>
+                        {data.type === 'text' && (
+                            <div
+                                className={cn(
+                                    'relative z-20 inline-flex w-max max-w-[500px] items-center rounded-2xl p-3 font-[400]',
+                                    !hasOnlyEmojis && 'bg-blue-500',
+                                    !hasOnlyEmojis && !isMe && 'bg-neutral-500/80',
+                                    hasOnlyEmojis && 'p-0 pb-2 text-5xl'
+                                )}
+                            >
+                                <pre className="relative z-20 w-full hyphens-auto whitespace-pre-wrap break-words font-sans text-white">
+                                    {data.message}
+                                </pre>
+                                <MessageOptions
+                                    isHovered={isHovered}
+                                    isMe={isMe}
+                                    data={data}
+                                    sender={sender}
+                                    handleDeleteMessage={handleDeleteMessage}
+                                />
+                            </div>
                         )}
-                    >
-                        <pre className="relative z-20 w-full hyphens-auto whitespace-pre-wrap break-words font-sans text-white">{data.message}</pre>
-
-                        <MessageOptions isHovered={isHovered} isMe={isMe} data={data} sender={sender} handleDeleteMessage={handleDeleteMessage} />
+                        {data.type === 'image' && (
+                            <ImageViewContainer
+                                isHovered={isHovered}
+                                isMe={isMe}
+                                data={data}
+                                sender={sender}
+                                handleDeleteMessage={handleDeleteMessage}
+                            />
+                        )}
                     </div>
-                )}
-                {data.type === 'image' && (
-                    <ImageViewContainer isHovered={isHovered} isMe={isMe} data={data} sender={sender} handleDeleteMessage={handleDeleteMessage} />
-                )}
-                {data.reactions && Object.keys(data.reactions).length !== 0 && (
-                    <ReactionsTag reactions={data.reactions} className={cn('relative z-30 -translate-y-1/4', isMe && 'text-right')} />
-                )}
+                    {data.reactions && Object.entries(data.reactions.count).length > 0 && (
+                        <ReactionsTag reactions={data.reactions} className={cn('absolute top-full z-30 -translate-y-1/2', isMe && 'text-right')} />
+                    )}
+                </div>
             </div>
         </div>
     )
@@ -203,7 +239,11 @@ function MessageOptions({ isHovered, isMe, data, sender, handleDeleteMessage }: 
                                 <MoreVertical size={16} />
                             </Button>
                         </PopoverTrigger>
-                        <PopoverContent className="p-2">
+                        <PopoverContent className="flex gap-3 p-2">
+                            <div className="flex gap-2 whitespace-pre-wrap">
+                                <div>Seen by</div>
+                                <SeenContainer seen={data.seenBy} />
+                            </div>
                             {isMe && (
                                 <Button type="button" variant="ghost" color="danger" onClick={() => handleDeleteMessage(data.id)}>
                                     Remove
@@ -242,6 +282,24 @@ function ReplyCard({ className, repliedTo }: ReplyCardProps) {
                 {repliedTo.type === 'image' && <ImageView src={repliedTo.message.split(';')[0]} className="h-20 w-20" />}
                 {repliedTo.type === 'text' && repliedTo.message}
             </div>
+        </div>
+    )
+}
+
+type SeenContainerProps = {
+    seen: string[]
+}
+function SeenContainer({ seen }: SeenContainerProps) {
+    const seenList = useAppSelector(selectUserInIdList(seen))
+
+    return (
+        <div className="flex items-center justify-end">
+            {seenList.map((user) => (
+                <Avatar key={user.id} className="aspect-square h-4 w-4">
+                    <AvatarImage src={user.avatar} alt="avatar" className="h-full w-full" />
+                    <AvatarFallback>{user.name}</AvatarFallback>
+                </Avatar>
+            ))}
         </div>
     )
 }

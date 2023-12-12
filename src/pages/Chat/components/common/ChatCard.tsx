@@ -10,7 +10,7 @@ import useAppSelector from '@/lib/hooks/useAppSelector'
 import useAuth from '@/lib/hooks/useAuth'
 import { cn } from '@/lib/utils'
 import { getDownloadURL, ref } from 'firebase/storage'
-import { MoreHorizontal } from 'lucide-react'
+import { Ban, Blocks, MoreHorizontal, User } from 'lucide-react'
 import { memo, useEffect, useMemo, useState } from 'react'
 
 type Props = {
@@ -141,11 +141,15 @@ const ChatOptionsView = memo(({ className }: ChatOptionsViewProps) => {
                     </button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent>
-                    <DropdownMenuItem>Hi</DropdownMenuItem>
-                    <DropdownMenuItem>Hi</DropdownMenuItem>
-                    <DropdownMenuItem>Hi</DropdownMenuItem>
-                    <DropdownMenuItem>Hi</DropdownMenuItem>
-                    <DropdownMenuItem>Hi</DropdownMenuItem>
+                    <DropdownMenuItem>
+                        <User /> View Profile
+                    </DropdownMenuItem>
+                    <DropdownMenuItem>
+                        <Ban /> Block
+                    </DropdownMenuItem>
+                    <DropdownMenuItem>
+                        <Blocks /> Report
+                    </DropdownMenuItem>
                 </DropdownMenuContent>
             </DropdownMenu>
         </div>

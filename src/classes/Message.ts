@@ -20,6 +20,7 @@ export class Message {
     replyIds: string[] = []
     repliedTo: ReplyBasic | null = null
     reactions: reactionsType
+    seenBy: string[] = []
 
     constructor(
         id: string,
@@ -30,7 +31,8 @@ export class Message {
         deletedOn: string | null = null,
         replies: string[] = [],
         repliedTo: ReplyBasic | null = null,
-        reactions?: reactionsType
+        reactions?: reactionsType,
+        seenBy?: string[]
     ) {
         this.id = id
         this.userId = userId
@@ -44,6 +46,7 @@ export class Message {
             count: {},
             data: {}
         }
+        this.seenBy = seenBy ?? []
     }
 }
 
@@ -57,13 +60,13 @@ export const MessageConverter: FirestoreDataConverter<Message> = {
             deletedOn: message.deletedOn ? Timestamp.fromDate(new Date(message.deletedOn)) : null,
             replyIds: message.replyIds,
             repliedTo: message.repliedTo,
-            reactions: message.reactions
+            reactions: message.reactions,
+            seenBy: message.seenBy
         }
     },
     fromFirestore: (snapshot: QueryDocumentSnapshot, options: SnapshotOptions) => {
         const data = snapshot.data(options)
         const id = snapshot.id
-        // return new Message(id, data.userId, data.message, (data.createdOn as Timestamp).toDate().toString(), data.type)
         return {
             id,
             userId: data.userId,
@@ -73,7 +76,8 @@ export const MessageConverter: FirestoreDataConverter<Message> = {
             deletedOn: data.deletedOn ? (data.deletedOn as Timestamp).toDate().toString() : null,
             replyIds: data.replyIds,
             repliedTo: data.repliedTo === null ? null : ({ ...data.repliedTo } as ReplyBasic),
-            reactions: data.reactions
+            reactions: data.reactions,
+            seenBy: data.seenBy ?? []
         } as Message
     }
 }
