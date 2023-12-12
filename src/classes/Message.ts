@@ -63,6 +63,8 @@ export const MessageConverter: FirestoreDataConverter<Message> = {
             reactions: message.reactions,
             seenBy: message.seenBy
         }
+
+        //
     },
     fromFirestore: (snapshot: QueryDocumentSnapshot, options: SnapshotOptions) => {
         const data = snapshot.data(options)
