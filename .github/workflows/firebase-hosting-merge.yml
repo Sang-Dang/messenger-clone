@@ -22,10 +22,8 @@ jobs:
               uses: actions/setup-node@v3
               with:
                   cache: 'pnpm'
-            - name: Install dependencies
-              run: pnpm install
             - uses: actions/checkout@v3
-            - run: npm ci && npm run build
+            - run: pnpm ci && pnpm run build
             - uses: FirebaseExtended/action-hosting-deploy@v0
               with:
                   repoToken: '${{ secrets.GITHUB_TOKEN }}'
