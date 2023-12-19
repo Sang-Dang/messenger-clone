@@ -1,5 +1,5 @@
 import { cn, onlyEmojis } from '@/lib/utils'
-import { useEffect, useRef, useState } from 'react'
+import { useRef } from 'react'
 
 type TextMessageProps = {
     message: string
@@ -10,19 +10,6 @@ type TextMessageProps = {
 export default function TextMessage({ message, isSelf, className }: TextMessageProps) {
     const hasOnlyEmojis = onlyEmojis(message)
     const messageRef = useRef<HTMLDivElement>(null)
-    const [isMultiline, setIsMultiline] = useState<boolean>(false)
-
-    useEffect(() => {
-        const currentRef = messageRef.current
-        if (currentRef) {
-            console.log(currentRef.clientHeight, currentRef.clientWidth)
-            if (currentRef.clientHeight < 50 && currentRef.clientWidth < 630) {
-                setIsMultiline(false)
-            } else {
-                setIsMultiline(true)
-            }
-        }
-    }, [])
 
     if (hasOnlyEmojis) {
         return (
@@ -36,9 +23,9 @@ export default function TextMessage({ message, isSelf, className }: TextMessageP
         <div
             ref={messageRef}
             className={cn(
-                'max-w-message whitespace-pre-wrap break-words rounded-full bg-slate-500 p-3 text-left text-medium text-white',
+                'w-max max-w-message whitespace-pre-wrap break-words rounded-2xl bg-slate-500 p-3 text-left text-medium text-white',
+                // isMultiline && 'rounded-2xl',
                 isSelf && 'bg-blue-500',
-                isMultiline && 'rounded-2xl',
                 className
             )}
         >

@@ -20,7 +20,9 @@ export default function ConversationView() {
                 <div className="rounded-lg bg-neutral-100 p-20 text-center shadow-sm transition-all hover:shadow-lg">
                     <MessagesSquare size={100} className="mx-auto" />
                     <h5 className="mt-5 text-2xl font-bold">No chats selected</h5>
-                    <p className="mt-2 text-sm font-normal">Please select a chat to start the conversation!</p>
+                    <p className="mt-2 text-sm font-normal">
+                        Please select a chat to start the conversation!
+                    </p>
                 </div>
             </div>
         )
@@ -45,7 +47,9 @@ type ConversationViewDataType = {
     chatId: string
 }
 function ConversationViewData({ chatId }: ConversationViewDataType) {
-    const [chat, loadingChat, errorChat] = useDocumentOnce(doc(db, 'chats', chatId).withConverter(ChatConverter))
+    const [chat, loadingChat, errorChat] = useDocumentOnce(
+        doc(db, 'chats', chatId).withConverter(ChatConverter)
+    )
     const [reply, setReply] = useState<ReplyBasic | null>(null) // ? maybe move to global state instead if there are any problems
 
     if (loadingChat || !chat) {
@@ -68,7 +72,7 @@ function ConversationViewData({ chatId }: ConversationViewDataType) {
         >
             <div className="flex h-full w-full flex-col">
                 <ChatHeader chat={chatData} className="" />
-                <MessagesViewContainer chatId={chatId} userIds={chat.data()?.users ?? []} className="h-1 flex-1" />
+                <MessagesViewContainer chatId={chatId} className="h-1 flex-1" />
                 <MessageInputBox chatId={chatId} className="" />
             </div>
         </ReplyContext.Provider>

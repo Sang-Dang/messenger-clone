@@ -27,7 +27,12 @@ type Props = {
     sender: User
     handleDeleteMessage: (messageId: string) => void
 }
-export default function MessageBubble({ data, sender, showAvatar = true, handleDeleteMessage }: Props) {
+export default function MessageBubble({
+    data,
+    sender,
+    showAvatar = true,
+    handleDeleteMessage
+}: Props) {
     const { user } = useAuth()
     const [isHovered, setIsHovered] = useState(false)
     const chatId = useAppSelector(SelectChatId)!
@@ -57,7 +62,12 @@ export default function MessageBubble({ data, sender, showAvatar = true, handleD
                 ref={mainRef}
                 onMouseOver={() => setIsHovered(true)}
                 onMouseLeave={() => setIsHovered(false)}
-                className={cn('flex items-end gap-3', isMe && 'flex-row-reverse', !isAvatarShown && 'mb-[2px]', isAvatarShown && 'mb-3')}
+                className={cn(
+                    'flex items-end gap-3',
+                    isMe && 'flex-row-reverse',
+                    !isAvatarShown && 'mb-[2px]',
+                    isAvatarShown && 'mb-3'
+                )}
             >
                 {isAvatarShown && (
                     <Avatar className="aspect-square h-full w-[40px]">
@@ -66,12 +76,19 @@ export default function MessageBubble({ data, sender, showAvatar = true, handleD
                     </Avatar>
                 )}
                 <div
-                    className={cn('relative flex flex-grow flex-col items-start', !isAvatarShown && 'ml-[52px]', isMe && 'ml-0 mr-[10px] items-end')}
+                    className={cn(
+                        'relative flex flex-grow flex-col items-start',
+                        !isAvatarShown && 'ml-[52px]',
+                        isMe && 'ml-0 mr-[10px] items-end'
+                    )}
                 >
                     {data.repliedTo && (
                         <ReplyCard
                             repliedTo={data.repliedTo!}
-                            className={cn('relative z-10 mt-3 flex flex-col items-start', isMe && 'items-end text-right')}
+                            className={cn(
+                                'relative z-10 mt-3 flex flex-col items-start',
+                                isMe && 'items-end text-right'
+                            )}
                         />
                     )}
                     {data.type === 'deleted' && (
@@ -114,7 +131,13 @@ export default function MessageBubble({ data, sender, showAvatar = true, handleD
                         )}
                     </div>
                     {data.reactions && Object.entries(data.reactions.count).length > 0 && (
-                        <ReactionsTag reactions={data.reactions} className={cn('absolute top-full z-30 -translate-y-1/2', isMe && 'text-right')} />
+                        <ReactionsTag
+                            reactions={data.reactions}
+                            className={cn(
+                                'absolute top-full z-30 -translate-y-1/2',
+                                isMe && 'text-right'
+                            )}
+                        />
                     )}
                 </div>
             </div>
@@ -129,7 +152,13 @@ type ImageViewContainerProps = {
     sender: User
     handleDeleteMessage: (messageId: string) => void
 }
-function ImageViewContainer({ isHovered, isMe, data, sender, handleDeleteMessage }: ImageViewContainerProps) {
+function ImageViewContainer({
+    isHovered,
+    isMe,
+    data,
+    sender,
+    handleDeleteMessage
+}: ImageViewContainerProps) {
     const imageUrls = data.message.split(';')
 
     return (
@@ -144,7 +173,13 @@ function ImageViewContainer({ isHovered, isMe, data, sender, handleDeleteMessage
             {imageUrls.map((url) => (
                 <ImageView key={url} src={url} />
             ))}
-            <MessageOptions isHovered={isHovered} isMe={isMe} data={data} sender={sender} handleDeleteMessage={handleDeleteMessage} />
+            <MessageOptions
+                isHovered={isHovered}
+                isMe={isMe}
+                data={data}
+                sender={sender}
+                handleDeleteMessage={handleDeleteMessage}
+            />
         </div>
     )
 }
@@ -157,9 +192,23 @@ type ImageViewProps = {
 function ImageView({ src, className, loadingClassName }: ImageViewProps) {
     const [downloadUrl, loading] = useDownloadURL(ref(storage, src))
 
-    if (loading) return <div className={cn('aspect-square h-56 animate-pulse rounded-2xl bg-neutral-200/50 object-cover', loadingClassName)} />
+    if (loading)
+        return (
+            <div
+                className={cn(
+                    'aspect-square h-56 animate-pulse rounded-2xl bg-neutral-200/50 object-cover',
+                    loadingClassName
+                )}
+            />
+        )
 
-    return <img src={downloadUrl} alt="" className={cn('aspect-square h-56 rounded-2xl object-cover', className)} />
+    return (
+        <img
+            src={downloadUrl}
+            alt=""
+            className={cn('aspect-square h-56 rounded-2xl object-cover', className)}
+        />
+    )
 }
 
 type MessageOptionsProps = {
@@ -169,7 +218,13 @@ type MessageOptionsProps = {
     sender: User
     handleDeleteMessage: (messageId: string) => void
 }
-function MessageOptions({ isHovered, isMe, data, sender, handleDeleteMessage }: MessageOptionsProps) {
+function MessageOptions({
+    isHovered,
+    isMe,
+    data,
+    sender,
+    handleDeleteMessage
+}: MessageOptionsProps) {
     const { setReply } = useReply()
     const { user } = useAuth()
     const chatId = useAppSelector(SelectChatId)
@@ -196,7 +251,10 @@ function MessageOptions({ isHovered, isMe, data, sender, handleDeleteMessage }: 
                         opacity: 0,
                         scale: 0.9
                     }}
-                    className={cn('absolute flex items-center gap-1', isMe ? 'right-full mr-3 flex-row-reverse' : 'left-full ml-3')}
+                    className={cn(
+                        'absolute flex items-center gap-1',
+                        isMe ? 'right-full mr-3 flex-row-reverse' : 'left-full ml-3'
+                    )}
                 >
                     <ReactionSelector handleSelectReaction={handleReaction}>
                         <Button
@@ -245,7 +303,12 @@ function MessageOptions({ isHovered, isMe, data, sender, handleDeleteMessage }: 
                                 <SeenContainer seen={data.seenBy} />
                             </div>
                             {isMe && (
-                                <Button type="button" variant="ghost" color="danger" onClick={() => handleDeleteMessage(data.id)}>
+                                <Button
+                                    type="button"
+                                    variant="ghost"
+                                    color="danger"
+                                    onClick={() => handleDeleteMessage(data.id)}
+                                >
                                     Remove
                                 </Button>
                             )}
@@ -267,7 +330,13 @@ type ReplyCardProps = {
 function ReplyCard({ className, repliedTo }: ReplyCardProps) {
     const username = useAppSelector((state) => state.users.users[repliedTo.userId].name)
     return (
-        <div className={cn('translate-y-1', className, repliedTo.type === 'image' && 'translate-y-1/4')}>
+        <div
+            className={cn(
+                'translate-y-1',
+                className,
+                repliedTo.type === 'image' && 'translate-y-1/4'
+            )}
+        >
             <div className="text-xs font-light text-blur">
                 <ReplyIcon className="mr-2 inline" size={12} />
                 You replied to <strong className="">{username}</strong>
@@ -279,7 +348,9 @@ function ReplyCard({ className, repliedTo }: ReplyCardProps) {
                 )}
             >
                 {repliedTo.type === 'deleted' && 'This message was deleted.'}
-                {repliedTo.type === 'image' && <ImageView src={repliedTo.message.split(';')[0]} className="h-20 w-20" />}
+                {repliedTo.type === 'image' && (
+                    <ImageView src={repliedTo.message.split(';')[0]} className="h-20 w-20" />
+                )}
                 {repliedTo.type === 'text' && repliedTo.message}
             </div>
         </div>

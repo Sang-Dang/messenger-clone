@@ -9,15 +9,21 @@ type ImageMessageProps = {
     imageUrls: string[]
     isSelf: boolean
     className?: string
+    imageClassName?: string
 }
 
-export default function ImageMessage({ imageUrls, isSelf, className }: ImageMessageProps) {
+export default function ImageMessage({
+    imageUrls,
+    isSelf,
+    className,
+    imageClassName
+}: ImageMessageProps) {
     const imageFactor = imageUrls.length % 3
 
     return (
         <div
             className={cn(
-                'w-message grid items-center gap-1',
+                'grid w-message items-center gap-1',
                 isSelf && 'justify-items-end',
                 imageUrls.length === 1 && 'grid-cols-1',
                 imageUrls.length === 2 && 'grid-cols-2',
@@ -35,8 +41,12 @@ export default function ImageMessage({ imageUrls, isSelf, className }: ImageMess
                         imageUrls.length > 2 &&
                             cn(
                                 'h-72',
-                                imageFactor === 1 && index === imageUrls.length - 1 && 'col-span-3 w-full',
-                                imageFactor === 2 && index === imageUrls.length - 1 && 'col-span-2 w-full'
+                                imageFactor === 1 &&
+                                    index === imageUrls.length - 1 &&
+                                    'col-span-3 w-full',
+                                imageFactor === 2 &&
+                                    index === imageUrls.length - 1 &&
+                                    'col-span-2 w-full'
                             )
                     )}
                     imageClassName={cn(
@@ -52,7 +62,8 @@ export default function ImageMessage({ imageUrls, isSelf, className }: ImageMess
                                 ((imageFactor === 0 && index === imageUrls.length - 3) ||
                                     (imageFactor === 1 && index === imageUrls.length - 1) ||
                                     (imageFactor === 2 && index === imageUrls.length - 2)))) &&
-                            'rounded-bl-[30px]'
+                            'rounded-bl-[30px]',
+                        imageClassName
                     )}
                 />
             ))}
@@ -79,7 +90,13 @@ function ImageView({ imageUrl, className, imageClassName }: ImageViewProps) {
 
     return (
         <div className={cn('group relative select-none', className)}>
-            <Image removeWrapper src={image} alt="image" loading="lazy" className={cn('h-full w-full object-cover', imageClassName)} />
+            <Image
+                removeWrapper
+                src={image}
+                alt="image"
+                loading="lazy"
+                className={cn('h-full w-full object-cover', imageClassName)}
+            />
             <div className="absolute right-3 top-3 z-20 grid h-8 w-8 cursor-pointer place-items-center rounded-full bg-slate-900/50 opacity-0 transition-all group-hover:opacity-100">
                 <Expand className="w-4 text-white" />
             </div>

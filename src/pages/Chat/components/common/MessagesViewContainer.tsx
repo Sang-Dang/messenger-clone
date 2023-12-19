@@ -1,28 +1,20 @@
 import { DeleteMessage } from '@/api/messages'
 import { MessageConverter } from '@/classes/Message'
-import { Separator } from '@/components/ui'
 import { db } from '@/firebase'
 import useAuth from '@/lib/hooks/useAuth'
 import { cn } from '@/lib/utils'
 import MessageBubble from '@/pages/Chat/components/MessageBubble'
-import differenceInMinutes from 'date-fns/differenceInMinutes'
-import format from 'date-fns/format'
 import { collection, orderBy, query } from 'firebase/firestore'
 import { MessageSquare } from 'lucide-react'
-import { Fragment, useCallback, useEffect, useRef } from 'react'
+import { useCallback, useEffect, useRef } from 'react'
 import { useCollectionData } from 'react-firebase-hooks/firestore'
 
 type MessagesViewContainerProps = {
     className?: string
     chatId: string
-    userIds: string[]
 }
 
-export default function MessagesViewContainer({
-    className,
-    chatId,
-    userIds
-}: MessagesViewContainerProps) {
+export default function MessagesViewContainer({ className, chatId }: MessagesViewContainerProps) {
     // get conversation messages
     const [messages, loadingMessages, errorMessages] = useCollectionData(
         query(
@@ -89,30 +81,13 @@ export default function MessagesViewContainer({
             ) : (
                 <div className="w-full overflow-y-auto px-3 pt-5" ref={scrollRef}>
                     {messages!.map((data, index, array) => (
-                        <Fragment key={data.id}>
-                            {differenceInMinutes(
-                                new Date(data.createdOn),
-                                new Date(array[index - 1]?.createdOn)
-                            ) > 10 && (
-                                <div className="relative mx-auto my-10">
-                                    <Separator className="w-full bg-primary/20" />
-                                    <p className="absolute left-1/2 w-max -translate-x-1/2 -translate-y-1/2 bg-white px-3 text-sm font-light text-primary/70">
-                                        {format(new Date(data.createdOn), 'dd/MM/yyyy - HH:mm')}
-                                    </p>
-                                </div>
-                            )}
-                            <MessageBubble
-                                key={data.id}
-                                message={data}
-                                isLastMessage={
-                                    array[index + 1] === undefined ||
-                                    array[index + 1].userId !== data.userId
-                                }
-                                lastMessageType={array[index - 1]?.type}
-                                nextMessageType={array[index + 1]?.type}
-                                handleDeleteMessage={handleDeleteMessage}
-                            />
-                        </Fragment>
+                        <MessageBubble
+                            key={data.id}
+                            message={data}
+                            lastMessage={array[index - 1] ?? null}
+                            nextMessage={array[index + 1] ?? null}
+                            handleDeleteMessage={handleDeleteMessage}
+                        />
                     ))}
                 </div>
             )}
