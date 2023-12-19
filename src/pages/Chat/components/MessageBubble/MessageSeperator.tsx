@@ -1,6 +1,5 @@
 import { Separator } from '@/components/ui'
 import format from 'date-fns/format'
-import React from 'react'
 
 type MessageSeperatorProps = {
     createdOn: string

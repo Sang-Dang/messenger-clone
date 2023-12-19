@@ -1,4 +1,5 @@
 import ReplyBasic from '@/classes/ReplyBasic'
+import { selectUserFieldById } from '@/features/Users/UsersSelectors'
 import { storage } from '@/firebase'
 import useAppSelector from '@/lib/hooks/useAppSelector'
 import { cn } from '@/lib/utils'
@@ -11,7 +12,7 @@ type ReplyMessageProps = {
     repliedTo: ReplyBasic
 }
 export default function ReplyMessage({ className, repliedTo }: ReplyMessageProps) {
-    const username = useAppSelector((state) => state.users.users[repliedTo.userId].name)
+    const username = useAppSelector(selectUserFieldById(repliedTo.userId, 'name'))
     return (
         <div
             className={cn(

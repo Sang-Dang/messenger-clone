@@ -39,7 +39,10 @@ const Navbar = () => {
                 <TooltipProvider>
                     <Tooltip>
                         <TooltipTrigger asChild>
-                            <Button variant={location.pathname === '/' ? 'secondary' : 'ghost'} onClick={() => navigate('/')}>
+                            <Button
+                                variant={location.pathname === '/' ? 'secondary' : 'ghost'}
+                                onClick={() => navigate('/')}
+                            >
                                 <Home />
                             </Button>
                         </TooltipTrigger>
@@ -51,7 +54,10 @@ const Navbar = () => {
                 <TooltipProvider>
                     <Tooltip>
                         <TooltipTrigger asChild>
-                            <Button variant={location.pathname === '/chat' ? 'secondary' : 'ghost'} onClick={() => navigate('/chat')}>
+                            <Button
+                                variant={location.pathname === '/chat' ? 'secondary' : 'ghost'}
+                                onClick={() => navigate('/chat')}
+                            >
                                 <MessageCircle />
                             </Button>
                         </TooltipTrigger>
@@ -63,7 +69,10 @@ const Navbar = () => {
                 <TooltipProvider>
                     <Tooltip>
                         <TooltipTrigger asChild>
-                            <Button variant={location.pathname === '/profile' ? 'secondary' : 'ghost'} onClick={() => navigate('/profile')}>
+                            <Button
+                                variant={location.pathname === '/profile' ? 'secondary' : 'ghost'}
+                                onClick={() => navigate('/profile')}
+                            >
                                 <User />
                             </Button>
                         </TooltipTrigger>
@@ -80,14 +89,19 @@ const Navbar = () => {
                     <DropdownMenuTrigger>
                         <Avatar>
                             <AvatarImage src={user.photoURL ?? ''} />
-                            <AvatarFallback className="text-neutral-900">US</AvatarFallback>
+                            <AvatarFallback className="text-neutral-900">
+                                {user.displayName?.slice(0, 2)}
+                            </AvatarFallback>
                         </Avatar>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent>
                         <DropdownMenuLabel>My Account</DropdownMenuLabel>
                         <DropdownMenuSeparator />
                         <DropdownMenuItem>Profile</DropdownMenuItem>
-                        <DropdownMenuItem className="bg-red-500 text-neutral-100" onClick={handleSignout}>
+                        <DropdownMenuItem
+                            className="bg-red-500 text-neutral-100"
+                            onClick={handleSignout}
+                        >
                             Logout
                         </DropdownMenuItem>
                     </DropdownMenuContent>

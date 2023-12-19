@@ -1,7 +1,5 @@
 import { Chat, ChatConverter } from '@/classes/Chat'
 import { Message } from '@/classes/Message'
-import { Input, ScrollArea } from '@/components/ui'
-import { selectChatsSearch } from '@/features/Chat/ChatSelectors'
 import {
     chatAdded,
     chatRemoved,
@@ -13,15 +11,11 @@ import {
 import { fetchUsers } from '@/features/Users/UsersThunks'
 import { db } from '@/firebase'
 import useAppDispatch from '@/lib/hooks/useAppDispatch'
-import useAppSelector from '@/lib/hooks/useAppSelector'
 import useAuth from '@/lib/hooks/useAuth'
-import ChatCard from '@/pages/Chat/components/ChatCard'
 import { collection, doc, orderBy, query, where } from 'firebase/firestore'
-import { Dispatch, SetStateAction, memo, useState } from 'react'
 import { useCollectionData } from 'react-firebase-hooks/firestore'
 
-const ChatList = memo(() => {
-    console.log('RENDER')
+export default function useChats() {
     const { user } = useAuth()
     const dispatch = useAppDispatch()
     const [, loading, error, snapshot] = useCollectionData(
@@ -75,60 +69,4 @@ const ChatList = memo(() => {
     })
 
     dispatch(loadedSuccessfully())
-
-    return <ChatListViewWrapper />
-})
-
-function ChatListViewWrapper() {
-    const [searchTerm, setSearchTerm] = useState('')
-    const chats = useAppSelector(selectChatsSearch(searchTerm))
-
-    chats
-        .sort(
-            (a, b) =>
-                (a.lastMessage ? new Date(a.lastMessage?.createdOn).getTime() : 0) -
-                (b.lastMessage ? new Date(b.lastMessage?.createdOn).getTime() : 0)
-        )
-        .reverse()
-
-    return (
-        <ChatListView
-            searchTerm={searchTerm}
-            setSearchTerm={setSearchTerm}
-            chats={chats.map((chat) => chat.id)}
-        />
-    )
 }
-
-type ChatListViewProps = {
-    searchTerm: string
-    setSearchTerm: Dispatch<SetStateAction<string>>
-    chats: string[]
-}
-const ChatListView = memo(
-    ({ searchTerm, setSearchTerm, chats }: ChatListViewProps) => {
-        return (
-            <>
-                <Input
-                    type="search"
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    placeholder="Search for Chats"
-                    className="mb-2 rounded-full p-5 focus-visible:ring-0"
-                />
-                <ScrollArea className="flex-grow overflow-y-auto px-3">
-                    {chats.map((chat) => (
-                        <div key={chat} className="my-2 first-of-type:mt-0 last-of-type:mb-0">
-                            <ChatCard key={chat} chatId={chat} />
-                        </div>
-                    ))}
-                </ScrollArea>
-            </>
-        )
-    },
-    (prev, next) =>
-        prev.chats.every((id, i) => id === next.chats[i]) && prev.chats.length === next.chats.length
-    // ! if anything breaks, blame this
-)
-
-export default ChatList

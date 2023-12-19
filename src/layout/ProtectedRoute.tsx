@@ -1,5 +1,7 @@
 import { toast } from '@/components/ui'
+import { selectUserById } from '@/features/Users/UsersSelectors'
 import { auth } from '@/firebase'
+import useAppSelector from '@/lib/hooks/useAppSelector'
 import useLoading from '@/lib/hooks/useLoading'
 import { User } from 'firebase/auth'
 import { createContext, useEffect } from 'react'
@@ -17,6 +19,7 @@ export default function ProtectedRoute() {
     const navigate = useNavigate()
     const [user, loading, error] = useAuthState(auth)
     const { handleOpen } = useLoading()
+    const currentUser = useAppSelector(selectUserById(user?.uid ?? ''))
 
     // useEffect to avoid concurrent rendering of this and LoadingContext
     useEffect(() => {
@@ -44,7 +47,16 @@ export default function ProtectedRoute() {
     }
 
     return (
-        <AuthContext.Provider value={{ user: user! }}>
+        <AuthContext.Provider
+            value={{
+                user: {
+                    ...user!,
+                    displayName: currentUser?.name ?? user.displayName,
+                    email: currentUser?.email ?? user.email,
+                    photoURL: currentUser?.avatar ?? user.photoURL
+                }
+            }}
+        >
             <Outlet />
         </AuthContext.Provider>
     )

@@ -5,7 +5,7 @@ import { createSelector } from '@reduxjs/toolkit'
 type selectUserByIdReturn = (state: RootState) => User | undefined
 export const selectUserById = (id: string): selectUserByIdReturn =>
     createSelector([(state: RootState) => state.users.users], (users: { [key: string]: User }) => {
-        return users[id]
+        return users[id] ?? undefined
     })
 
 type selectUserInIdListReturn = (state: RootState) => User[]
@@ -32,5 +32,5 @@ export const selectUsersList = (state: RootState) => state.users.users
 export const selectUserIds = (state: RootState) => state.users.userIds
 export const selectUserFieldById = (id: string, field: keyof User) =>
     createSelector([(state: RootState) => state.users.users], (users: { [key: string]: User }) => {
-        return users[id][field]
+        return users[id] ? users[id][field] : undefined
     })

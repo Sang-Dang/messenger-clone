@@ -1,6 +1,8 @@
-import ChatSidebar from '@/pages/Chat/components/ChatSidebar'
-import ConversationView from '@/pages/Chat/components/ConversationView'
+import { lazy } from 'react'
 import { Helmet } from 'react-helmet'
+
+const ChatSidebar = lazy(() => import('@/pages/Chat/components/ChatSidebar'))
+const ConversationView = lazy(() => import('@/pages/Chat/components/ConversationView'))
 
 export default function ChatPage() {
     return (

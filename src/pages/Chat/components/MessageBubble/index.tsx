@@ -2,15 +2,16 @@ import { Message } from '@/classes/Message'
 import useAuth from '@/lib/hooks/useAuth'
 import { cn } from '@/lib/utils'
 import DeletedMessage from '@/pages/Chat/components/MessageBubble/DeletedMessage'
-import ImageMessage from '@/pages/Chat/components/MessageBubble/ImageMessage'
-import MessageAvatar from '@/pages/Chat/components/MessageBubble/MessageAvatar'
-import MessageOptions from '@/pages/Chat/components/MessageBubble/MessageOptions'
 import MessageSeperator from '@/pages/Chat/components/MessageBubble/MessageSeperator'
 import ReplyMessage from '@/pages/Chat/components/MessageBubble/ReplyMessage'
-import TextMessage from '@/pages/Chat/components/MessageBubble/TextMessage'
 import { ReactionsTag } from '@/pages/Chat/components/common/ReactionsTag'
 import differenceInMinutes from 'date-fns/differenceInMinutes'
-import { memo, useMemo, useState } from 'react'
+import { lazy, memo, useMemo, useState } from 'react'
+
+const TextMessage = lazy(() => import('@/pages/Chat/components/MessageBubble/TextMessage'))
+const ImageMessage = lazy(() => import('@/pages/Chat/components/MessageBubble/ImageMessage'))
+const MessageAvatar = lazy(() => import('@/pages/Chat/components/MessageBubble/MessageAvatar'))
+const MessageOptions = lazy(() => import('@/pages/Chat/components/MessageBubble/MessageOptions'))
 
 type MessageBubbleProps = {
     message: Message

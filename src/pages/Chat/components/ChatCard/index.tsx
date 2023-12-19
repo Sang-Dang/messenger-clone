@@ -1,5 +1,5 @@
-import { Chat } from '@/classes/Chat'
 import { Message } from '@/classes/Message'
+import { selectChatById } from '@/features/Chat/ChatSelectors'
 import { SelectChatId } from '@/features/Messages/MessagesSelectors'
 import { selectChatId } from '@/features/Messages/MessagesSlice'
 import { selectUserById } from '@/features/Users/UsersSelectors'
@@ -9,16 +9,18 @@ import useAuth from '@/lib/hooks/useAuth'
 import { cn } from '@/lib/utils'
 import ChatCardAvatar from '@/pages/Chat/components/ChatCard/ChatCardAvatar'
 import ChatCardLastMessage from '@/pages/Chat/components/ChatCard/ChatCardLastMessage'
-import ChatCardOptions from '@/pages/Chat/components/ChatCard/ChatCardOptions'
 import ChatCardTitle from '@/pages/Chat/components/ChatCard/ChatCardTitle'
-import { useMemo } from 'react'
+import { lazy, useMemo } from 'react'
+
+const ChatCardOptions = lazy(() => import('@/pages/Chat/components/ChatCard/ChatCardOptions'))
 
 type ChatCardProps = {
-    chat: Chat
+    chatId: string
 }
 
-const ChatCard = ({ chat }: ChatCardProps) => {
-    console.log('RENDER')
+const ChatCard = ({ chatId }: ChatCardProps) => {
+    const chat = useAppSelector(selectChatById(chatId))
+
     const { user } = useAuth()
     const dispatch = useAppDispatch()
     const selectedChatCard = useAppSelector(SelectChatId)
@@ -27,9 +29,11 @@ const ChatCard = ({ chat }: ChatCardProps) => {
     }
     const recipientId = chat.users.filter((cur) => cur !== user.uid)[0]
     const recipient = useAppSelector(selectUserById(recipientId))
+    let chatName = chat.chatName
+    let avatar = chat.avatar
     if (chat.users.length === 2 && recipient) {
-        chat.chatName = recipient.name
-        chat.avatar = recipient.avatar
+        chatName = recipient.name
+        avatar = recipient.avatar
     }
 
     const lastMessage = useMemo(() => {
@@ -51,12 +55,12 @@ const ChatCard = ({ chat }: ChatCardProps) => {
                 onClick={handleChangeChat}
             >
                 <ChatCardAvatar
-                    avatar={chat.avatar}
-                    fallback={chat.chatName.slice(0, 2)}
+                    avatar={avatar}
+                    fallback={chatName.slice(0, 2)}
                     className="h-[50px] w-[50px] rounded-full"
                 />
                 <div className="flex flex-col items-start justify-center">
-                    <ChatCardTitle chatName={chat.chatName} className="text-h6 font-semibold" />
+                    <ChatCardTitle chatName={chatName} className="text-h6 font-semibold" />
                     <p className="w-48 overflow-hidden overflow-ellipsis whitespace-nowrap text-small font-normal tracking-wide">
                         {lastMessage !== null ? (
                             <ChatCardLastMessage lastMessage={lastMessage} />
