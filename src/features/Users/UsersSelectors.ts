@@ -30,3 +30,7 @@ export const selectUserInIdListObject = (idList: string[]): selectUserInIdListOb
 export const selectUserStatus = (state: RootState) => state.users.status
 export const selectUsersList = (state: RootState) => state.users.users
 export const selectUserIds = (state: RootState) => state.users.userIds
+export const selectUserFieldById = (id: string, field: keyof User) =>
+    createSelector([(state: RootState) => state.users.users], (users: { [key: string]: User }) => {
+        return users[id][field]
+    })

@@ -5,18 +5,12 @@
     },
     "hosting": {
         "public": "dist",
-        "ignore": ["firebase.json", "**/.*", "**/node_modules/**"],
+        "ignore": [],
         "rewrites": [
             {
                 "source": "**",
                 "destination": "/index.html"
             }
         ]
-    },
-    "storage": {
-        "rules": "storage.rules"
-    },
-    "database": {
-        "rules": "database.rules.json"
     }
 }

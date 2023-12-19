@@ -10,6 +10,9 @@
         --std-margin: 2rem;
         --blur: rgb(101, 103, 107);
 
+        --message-width: 40rem;
+        --message-height: 10rem;
+
         --h1-font-size: 2.986rem;
         --h2-font-size: 2.488rem;
         --h3-font-size: 2.074rem;
