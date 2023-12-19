@@ -7,7 +7,7 @@ type initialStateType = {
     value: {
         messages: Message[]
         messageIds: {
-            [id: string]: number
+            [id: string]: number // id to index
         }
     }
     metadata: {
@@ -92,7 +92,11 @@ const MessagesSlice = createSlice({
 export const loadMessagesStart = createAsyncThunk(
     'messages/loadMessagesStart',
     async ({ chatId, limitNo }: { chatId: string; limitNo: number }, thunkAPI) => {
-        const q = query(collection(db, 'chats', chatId, 'messages').withConverter(MessageConverter), orderBy('createdOn', 'asc'), limit(limitNo))
+        const q = query(
+            collection(db, 'chats', chatId, 'messages').withConverter(MessageConverter),
+            orderBy('createdOn', 'asc'),
+            limit(limitNo)
+        )
         const querySnapshot = await getDocs(q)
         const messages = querySnapshot.docs.map((doc) => doc.data() as Message)
         thunkAPI.dispatch(MessagesSlice.actions.conversationLoaded(messages))
@@ -102,13 +106,24 @@ export const loadMessagesStart = createAsyncThunk(
 export const getDocumentByOrder = createAsyncThunk(
     'messages/getDocumentByOrder',
     async ({ chatId, index }: { chatId: string; index: number }, thunkAPI) => {
-        const q = query(collection(db, 'chats', chatId, 'messages').withConverter(MessageConverter), orderBy('createdOn', 'desc'), limit(index))
+        const q = query(
+            collection(db, 'chats', chatId, 'messages').withConverter(MessageConverter),
+            orderBy('createdOn', 'desc'),
+            limit(index)
+        )
         const querySnapshot = await getDocs(q)
         const messages = querySnapshot.docs.map((doc) => doc.data() as Message)
         thunkAPI.dispatch(MessagesSlice.actions.setOldestMessage(messages[index].id))
     }
 )
 
-export const { messageAddedNew, messageUpdated, conversationLoaded, messagesAddedOld, selectChatId, setOldestMessage } = MessagesSlice.actions
+export const {
+    messageAddedNew,
+    messageUpdated,
+    conversationLoaded,
+    messagesAddedOld,
+    selectChatId,
+    setOldestMessage
+} = MessagesSlice.actions
 const MessagesReducer = MessagesSlice.reducer
 export default MessagesReducer

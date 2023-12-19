@@ -1,6 +1,14 @@
 import { Chat } from '@/classes/Chat'
 import { Message } from '@/classes/Message'
-import { Avatar, AvatarFallback, AvatarImage, DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui'
+import {
+    Avatar,
+    AvatarFallback,
+    AvatarImage,
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuTrigger
+} from '@/components/ui'
 import { SelectChatId } from '@/features/Messages/MessagesSelectors'
 import { selectChatId } from '@/features/Messages/MessagesSlice'
 import { selectUserById } from '@/features/Users/UsersSelectors'
@@ -17,9 +25,12 @@ type Props = {
     chat: Chat
 }
 
-export default function ChatCard({ chat }: Props) {
+const ChatCard = ({ chat }: Props) => {
     const { user } = useAuth()
-    const recipientId = useMemo(() => chat.users.filter((cur) => cur !== user.uid)[0], [chat.users, user.uid])
+    const recipientId = useMemo(
+        () => chat.users.filter((cur) => cur !== user.uid)[0],
+        [chat.users, user.uid]
+    )
     const recipient = useAppSelector(selectUserById(recipientId)) // select first person besides self
 
     if (chat.users.length <= 2 && recipient) {
@@ -32,7 +43,14 @@ export default function ChatCard({ chat }: Props) {
     const memoAvatar = useMemo(() => chat.avatar, [chat.avatar])
     const memoLastMessage = useMemo(() => chat.lastMessage, [chat.lastMessage])
 
-    return <ChatCardView id={memoId} chatName={memoChatName} avatar={memoAvatar} lastMessage={memoLastMessage} />
+    return (
+        <ChatCardView
+            id={memoId}
+            chatName={memoChatName}
+            avatar={memoAvatar}
+            lastMessage={memoLastMessage}
+        />
+    )
 }
 
 type ChatCardViewProps = {
@@ -59,11 +77,19 @@ const ChatCardView = memo(({ id, chatName, avatar, lastMessage }: ChatCardViewPr
                 )}
                 onClick={handleChangeChat}
             >
-                <ChatAvatarView avatar={avatar} fallback={chatName.slice(0, 2)} className="h-[50px] w-[50px] rounded-full" />
+                <ChatAvatarView
+                    avatar={avatar}
+                    fallback={chatName.slice(0, 2)}
+                    className="h-[50px] w-[50px] rounded-full"
+                />
                 <div className="flex flex-col items-start justify-center">
                     <TitleView chatName={chatName} className="text-h6 font-semibold" />
                     <p className="w-48 overflow-hidden overflow-ellipsis whitespace-nowrap text-small font-normal tracking-wide">
-                        {lastMessage !== null ? <LastMessageView lastMessage={lastMessage} /> : 'There are no messages'}
+                        {lastMessage !== null ? (
+                            <LastMessageView lastMessage={lastMessage} />
+                        ) : (
+                            'There are no messages'
+                        )}
                     </p>
                 </div>
             </div>
@@ -77,7 +103,11 @@ type TitleViewProps = {
     className?: string
 }
 const TitleView = memo(({ chatName, className }: TitleViewProps) => {
-    return <h5 className={cn('w-52 overflow-hidden text-ellipsis whitespace-nowrap', className)}>{chatName}</h5>
+    return (
+        <h5 className={cn('w-52 overflow-hidden text-ellipsis whitespace-nowrap', className)}>
+            {chatName}
+        </h5>
+    )
 })
 
 // ------------------------------
@@ -91,7 +121,9 @@ const LastMessageView = memo(({ lastMessage }: LastMessageViewProps) => {
         sender &&
         (sender.id === user.uid ? 'You' : sender.name) +
             ': ' +
-            (lastMessage.message.length > 30 ? lastMessage.message.slice(0, 30) + '...' : lastMessage.message)
+            (lastMessage.message.length > 30
+                ? lastMessage.message.slice(0, 30) + '...'
+                : lastMessage.message)
     )
 })
 
@@ -122,7 +154,9 @@ const ChatAvatarView = memo(({ className, avatar, fallback }: ChatAvatarViewProp
     return (
         <Avatar className={cn(className)}>
             <AvatarImage src={avatarObj} alt="avatar" className="h-[50px] w-[50px]" />
-            <AvatarFallback className="h-[50px] w-[50px] text-neutral-900 ">{fallback}</AvatarFallback>
+            <AvatarFallback className="h-[50px] w-[50px] text-neutral-900 ">
+                {fallback}
+            </AvatarFallback>
         </Avatar>
     )
 })
@@ -155,3 +189,5 @@ const ChatOptionsView = memo(({ className }: ChatOptionsViewProps) => {
         </div>
     )
 })
+
+export default ChatCard

@@ -94,7 +94,7 @@ function ImageView({ imageUrl, className, imageClassName }: ImageViewProps) {
                 removeWrapper
                 src={image}
                 alt="image"
-                loading="lazy"
+                loading="eager"
                 className={cn('h-full w-full object-cover', imageClassName)}
             />
             <div className="absolute right-3 top-3 z-20 grid h-8 w-8 cursor-pointer place-items-center rounded-full bg-slate-900/50 opacity-0 transition-all group-hover:opacity-100">

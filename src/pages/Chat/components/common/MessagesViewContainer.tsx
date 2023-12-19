@@ -40,21 +40,6 @@ export default function MessagesViewContainer({ className, chatId }: MessagesVie
     )
 
     useEffect(() => {
-        function handleLoadMoreMessages(e: Event) {
-            if ((e.target as HTMLDivElement).scrollTop === 0) {
-                console.log('fetching more messages')
-            }
-        }
-
-        const currentRef = scrollRef.current
-        currentRef && currentRef.addEventListener('scroll', handleLoadMoreMessages)
-
-        return () => {
-            currentRef && currentRef.removeEventListener('scroll', handleLoadMoreMessages)
-        }
-    }, [])
-
-    useEffect(() => {
         scrollRef.current?.scrollTo({
             top: scrollRef.current?.scrollHeight
         })

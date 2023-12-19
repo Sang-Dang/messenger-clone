@@ -4,10 +4,11 @@ import CreateConversationDialog from '@/pages/Chat/components/dialogs/CreateConv
 import { PlusSquare } from 'lucide-react'
 
 export default function ChatSidebar() {
+    console.log('RENDER')
     return (
-        <aside className="p-std flex h-fullNoHeader w-[400px] resize-x flex-col rounded-r-lg border-r-2 border-r-neutral-200 bg-secondary shadow-2xl">
+        <aside className="flex h-fullNoHeader w-[400px] resize-x flex-col rounded-r-lg border-r-2 border-r-neutral-200 bg-secondary p-std shadow-2xl">
             <div className="mb-6 flex items-center gap-3">
-                <h1 className="text-h3 flex-grow font-bold">Chats</h1>
+                <h1 className="flex-grow text-h3 font-bold">Chats</h1>
                 <CreateConversationDialog
                     tooltipContent={
                         <p>
