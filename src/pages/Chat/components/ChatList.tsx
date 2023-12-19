@@ -4,13 +4,12 @@ import { fetchUsers } from '@/features/Users/UsersSlice'
 import { db } from '@/firebase'
 import useAppDispatch from '@/lib/hooks/useAppDispatch'
 import useAuth from '@/lib/hooks/useAuth'
-import ChatCard from '@/pages/Chat/components/common/ChatCard'
+import ChatCard from '@/pages/Chat/components/ChatCard'
 import { collection, doc, orderBy, query, where } from 'firebase/firestore'
 import { memo, useState } from 'react'
 import { useCollectionData } from 'react-firebase-hooks/firestore'
 
 const ChatList = memo(() => {
-    console.log('RENDER')
     const { user } = useAuth()
     const dispatch = useAppDispatch()
     const [data, loading, error] = useCollectionData(
@@ -38,7 +37,6 @@ type ChatListViewProps = {
     chats: Chat[]
 }
 function ChatListView({ chats }: ChatListViewProps) {
-    console.log('RENDER')
     const [searchTerm, setSearchTerm] = useState('')
 
     chats = chats.filter((cur) => cur.chatName.toLowerCase().includes(searchTerm.toLowerCase()))
