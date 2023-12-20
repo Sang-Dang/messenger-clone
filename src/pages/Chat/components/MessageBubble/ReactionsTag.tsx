@@ -1,14 +1,24 @@
-import { reactionsType } from '@/classes/Message'
+import { Reactions } from '@/classes/Message'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui'
 import { selectUserInIdListObject } from '@/features/Users/UsersSelectors'
 import { usersObj } from '@/features/Users/UsersSlice'
 import useAppSelector from '@/lib/hooks/useAppSelector'
 import { cn } from '@/lib/utils'
-import { Modal, ModalBody, ModalContent, ModalHeader, Tab, Tabs, Tooltip, useDisclosure } from '@nextui-org/react'
+import {
+    Modal,
+    ModalBody,
+    ModalContent,
+    ModalHeader,
+    Tab,
+    Tabs,
+    Tooltip,
+    useDisclosure
+} from '@nextui-org/react'
+import { Fragment } from 'react'
 
 export type ReactionsTagType = {
     className?: string
-    reactions: reactionsType
+    reactions: Reactions
 }
 export function ReactionsTag({ className, reactions }: ReactionsTagType) {
     // object for easy retrieval (better than linear search with array)
@@ -16,7 +26,7 @@ export function ReactionsTag({ className, reactions }: ReactionsTagType) {
     const allUsers = Object.values(users)
     const { isOpen, onOpen, onOpenChange } = useDisclosure()
 
-    const uniqueReactions = Object.keys(reactions.count)
+    const uniqueReactions = Array.from(new Set(Object.values(reactions.data)))
 
     return (
         <>
@@ -36,22 +46,34 @@ export function ReactionsTag({ className, reactions }: ReactionsTagType) {
             >
                 <div
                     onClick={onOpen}
-                    className={cn('flex w-max cursor-pointer items-center rounded-3xl bg-neutral-200 p-[1px] text-sm shadow-2xl', className)}
+                    className={cn(
+                        'flex h-6 w-max cursor-pointer items-center rounded-3xl bg-white px-1 text-sm',
+                        className
+                    )}
+                    style={{
+                        boxShadow: 'rgba(0, 0, 0, 0.1) 0px 2px 4px 0px'
+                    }}
                 >
-                    {uniqueReactions.map((react) => react)}
-                    {uniqueReactions.length > 1 && <div className="ml-1 text-xs">{uniqueReactions.length}</div>}
+                    {uniqueReactions.map((react) => (
+                        <Fragment key={react}>{react}</Fragment>
+                    ))}
+                    {Object.keys(reactions.data).length > 1 && (
+                        <div className="p-1 text-xs font-semibold text-neutral-700">
+                            {Object.keys(reactions.data).length}
+                        </div>
+                    )}
                 </div>
             </Tooltip>
             <Modal isOpen={isOpen} onOpenChange={onOpenChange}>
                 <ModalContent>
                     <ModalHeader>Message Reactions</ModalHeader>
                     <ModalBody>
-                        <Tabs aria-label="options">
+                        <Tabs aria-label="options" fullWidth>
                             <Tab
                                 title={
                                     <div className="flex items-center gap-2">
                                         <span>All</span>
-                                        <span>{Object.values(reactions.count).reduce((prev, curr) => prev + curr, 0)}</span>
+                                        <span>{Object.values(reactions.data).length}</span>
                                     </div>
                                 }
                             >
@@ -63,11 +85,21 @@ export function ReactionsTag({ className, reactions }: ReactionsTagType) {
                                     title={
                                         <div className="flex items-center gap-2">
                                             <span>{reaction}</span>
-                                            <span>{reactions.count[reaction]}</span>
+                                            <span>
+                                                {Object.values(reactions.data).reduce(
+                                                    (prev, curr) =>
+                                                        (prev = prev + (curr === reaction ? 1 : 0)),
+                                                    0
+                                                )}
+                                            </span>
                                         </div>
                                     }
                                 >
-                                    <ReactionTab reactions={reactions.data} users={users} filter={reaction} />
+                                    <ReactionTab
+                                        reactions={reactions.data}
+                                        users={users}
+                                        filter={reaction}
+                                    />
                                 </Tab>
                             ))}
                         </Tabs>
@@ -101,7 +133,10 @@ function ReactionTab({ reactions, users, filter }: ReactionTabType) {
                 if (!currentUser) return null
 
                 return (
-                    <div key={userId} className="flex w-full items-center rounded-2xl bg-neutral-100 p-3 transition-all hover:bg-neutral-200">
+                    <div
+                        key={userId}
+                        className="flex w-full items-center rounded-2xl bg-neutral-100 p-3 transition-all hover:bg-neutral-200"
+                    >
                         <Avatar>
                             <AvatarImage src={currentUser.avatar} alt="avatar"></AvatarImage>
                             <AvatarFallback>{currentUser.name}</AvatarFallback>

@@ -23,9 +23,9 @@ export default function TextMessage({ message, isSelf, className }: TextMessageP
         <div
             ref={messageRef}
             className={cn(
-                'w-max max-w-message whitespace-pre-wrap break-words rounded-2xl bg-slate-500 p-3 text-left text-medium text-white',
+                'w-max max-w-message whitespace-pre-wrap break-words rounded-2xl bg-slate-200 p-3 text-left text-medium text-black',
                 // isMultiline && 'rounded-2xl',
-                isSelf && 'bg-blue-500',
+                isSelf && 'bg-purple-700 text-white',
                 className
             )}
         >

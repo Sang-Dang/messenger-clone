@@ -1,4 +1,4 @@
-import ReplyBasic from '@/classes/ReplyBasic'
+import Reply from '@/classes/Reply'
 import { selectUserFieldById } from '@/features/Users/UsersSelectors'
 import { storage } from '@/firebase'
 import useAppSelector from '@/lib/hooks/useAppSelector'
@@ -9,7 +9,7 @@ import { useDownloadURL } from 'react-firebase-hooks/storage'
 
 type ReplyMessageProps = {
     className?: string
-    repliedTo: ReplyBasic
+    repliedTo: Reply
 }
 export default function ReplyMessage({ className, repliedTo }: ReplyMessageProps) {
     const username = useAppSelector(selectUserFieldById(repliedTo.userId, 'name'))

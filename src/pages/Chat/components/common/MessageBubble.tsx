@@ -1,6 +1,6 @@
 import { ToggleReaction } from '@/api/messages/ToggleReaction'
 import { Message } from '@/classes/Message'
-import ReplyBasic from '@/classes/ReplyBasic'
+import Reply from '@/classes/Reply'
 import { User } from '@/classes/User'
 import ReactionSelector from '@/components/ReactionSelector'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui'
@@ -16,7 +16,7 @@ import { AnimatePresence, motion, useInView } from 'framer-motion'
 import { MoreVertical, Reply, ReplyIcon, Smile } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
 import { useDownloadURL } from 'react-firebase-hooks/storage'
-import { ReactionsTag } from './ReactionsTag'
+import { ReactionsTag } from '../MessageBubble/ReactionsTag'
 import { SeenMessage } from '@/api/messages/SeenMessage'
 import { selectUserInIdList } from '@/features/Users/UsersSelectors'
 import { SelectConversationChatId } from '@/features/Conversation.ts/ConversationSelectors'
@@ -325,7 +325,7 @@ function MessageOptions({
 
 type ReplyCardProps = {
     className?: string
-    repliedTo: ReplyBasic
+    repliedTo: Reply
 }
 function ReplyCard({ className, repliedTo }: ReplyCardProps) {
     const username = useAppSelector((state) => state.users.users[repliedTo.userId].name)

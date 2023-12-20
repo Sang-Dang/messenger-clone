@@ -1,9 +1,9 @@
-import { Chat } from '@/classes/Chat'
+import { Chat, ChatSerializable } from '@/classes/Chat'
 import { PayloadAction, createSlice } from '@reduxjs/toolkit'
 
 type ChatStateType = {
     value: {
-        list: { [key: string]: Chat }
+        list: { [key: string]: ChatSerializable }
         ids: string[]
     }
     status: 'idle' | 'loading' | 'failed'
@@ -23,16 +23,34 @@ export const chatSlice = createSlice({
     name: 'chat',
     initialState,
     reducers: {
-        chatAdded: (state, action: PayloadAction<Chat>) => {
-            const chat = action.payload
-            if (!state.value.list[chat.id]) {
-                state.value.ids.push(chat.id)
-                state.value.list[chat.id] = chat
+        chatAdded: {
+            prepare: (chat: Chat) => {
+                return {
+                    payload: {
+                        ...Chat.serialize(chat)
+                    }
+                }
+            },
+            reducer: (state, action: PayloadAction<ChatSerializable>) => {
+                const chat = action.payload
+                if (!state.value.list[chat.id]) {
+                    state.value.ids.push(chat.id)
+                    state.value.list[chat.id] = chat
+                }
             }
         },
-        chatUpdated: (state, action: PayloadAction<Chat>) => {
-            const chat = action.payload
-            if (state.value.list[chat.id]) state.value.list[chat.id] = chat
+        chatUpdated: {
+            prepare(chat: Chat) {
+                return {
+                    payload: {
+                        ...Chat.serialize(chat)
+                    }
+                }
+            },
+            reducer: (state, action: PayloadAction<ChatSerializable>) => {
+                const chat = action.payload
+                if (state.value.list[chat.id]) state.value.list[chat.id] = chat
+            }
         },
         chatRemoved: (state, action: PayloadAction<{ id: string }>) => {
             const chat = action.payload
@@ -63,6 +81,5 @@ export const {
     errorOccurred,
     loadedSuccessfully
 } = chatSlice.actions
-export const selectAllChats = (state: ChatStateType) => state.value
 
 export default chatReducer

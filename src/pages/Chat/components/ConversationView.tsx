@@ -1,4 +1,4 @@
-import ReplyBasic from '@/classes/ReplyBasic'
+import Reply from '@/classes/Reply'
 import { selectChatById } from '@/features/Chat/ChatSelectors'
 import { SelectConversationChatId } from '@/features/Conversation.ts/ConversationSelectors'
 import useAppSelector from '@/lib/hooks/useAppSelector'
@@ -29,8 +29,8 @@ export default function ConversationView() {
 }
 
 export type ReplyContextType = {
-    reply: ReplyBasic | null
-    setReply: (response: ReplyBasic | null) => void
+    reply: Reply | null
+    setReply: (response: Reply | null) => void
     resetReply: () => void
 }
 export const ReplyContext = createContext<ReplyContextType>({
@@ -44,7 +44,7 @@ type ConversationViewDataType = {
     chatId: string
 }
 function ConversationViewData({ chatId }: ConversationViewDataType) {
-    const [reply, setReply] = useState<ReplyBasic | null>(null) // ? maybe move to global state instead if there are any problems
+    const [reply, setReply] = useState<Reply | null>(null) // ? maybe move to global state instead if there are any problems
     const chat = useAppSelector(selectChatById(chatId))
 
     return (

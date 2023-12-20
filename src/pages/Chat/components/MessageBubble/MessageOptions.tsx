@@ -59,7 +59,10 @@ export default function MessageOptions({
                     }}
                     className={cn('flex items-center gap-1', isSelf && 'flex-row-reverse')}
                 >
-                    <ReactionSelector handleSelectReaction={handleReaction}>
+                    <ReactionSelector
+                        handleSelectReaction={handleReaction}
+                        currentReaction={data.reactions.data[user.uid]}
+                    >
                         <Button
                             variant="solid"
                             isIconOnly
@@ -118,7 +121,7 @@ export default function MessageOptions({
                         </PopoverContent>
                     </Popover>
                     <div className={cn('w-max text-xs font-light', isSelf ? 'mr-3' : 'ml-3    ')}>
-                        {format(new Date(data.createdOn), 'dd/MM/yyyy HH:mm:ss')}
+                        {format(data.createdOn.toDate(), 'dd/MM/yyyy HH:mm:ss')}
                     </div>
                 </motion.div>
             )}

@@ -1,4 +1,4 @@
-import { DeleteMessage } from '@/api/messages'
+import { DeleteMessage, SeenMessage } from '@/api/messages'
 import {
     SelectConversationChatId,
     SelectConversationMessageById
@@ -13,9 +13,11 @@ import MessageOptions from '@/pages/Chat/components/MessageBubble/MessageOptions
 import MessageSeperator from '@/pages/Chat/components/MessageBubble/MessageSeperator'
 import ReplyMessage from '@/pages/Chat/components/MessageBubble/ReplyMessage'
 import TextMessage from '@/pages/Chat/components/MessageBubble/TextMessage'
-import { ReactionsTag } from '@/pages/Chat/components/common/ReactionsTag'
+import { ReactionsTag } from '@/pages/Chat/components/MessageBubble/ReactionsTag'
 import differenceInMinutes from 'date-fns/differenceInMinutes'
-import { memo, useMemo, useState } from 'react'
+import { memo, useEffect, useMemo, useRef, useState } from 'react'
+import SeenContainer from '@/pages/Chat/components/MessageBubble/SeenContainer'
+import { useInView } from 'framer-motion'
 
 type MessageBubbleProps = {
     messageId: string
@@ -23,13 +25,25 @@ type MessageBubbleProps = {
     nextMessageId: string
 }
 const MessageBubble = memo(({ messageId, lastMessageId, nextMessageId }: MessageBubbleProps) => {
-    const message = useAppSelector(SelectConversationMessageById(messageId))
-    const lastMessage = useAppSelector(SelectConversationMessageById(lastMessageId))
-    const nextMessage = useAppSelector(SelectConversationMessageById(nextMessageId))
-    const chatId = useAppSelector(SelectConversationChatId)
+    const message = useAppSelector(SelectConversationMessageById(messageId))!
+    const lastMessage = useAppSelector(SelectConversationMessageById(lastMessageId)) ?? null
+    const nextMessage = useAppSelector(SelectConversationMessageById(nextMessageId)) ?? null
+    const chatId = useAppSelector(SelectConversationChatId)!
     const [isHovered, setIsHovered] = useState(false)
     const { user } = useAuth()
+    const messageRef = useRef<HTMLDivElement>(null)
+    const isInView = useInView(messageRef, {
+        once: false
+    })
+
     const isSelf = message.userId === user.uid
+
+    // TODO change seenBy from array to key value object
+    useEffect(() => {
+        if (isInView && !message.seenBy.includes(user.uid)) {
+            SeenMessage(message.id, user.uid, chatId)
+        }
+    }, [chatId, isInView, message, message.id, message.seenBy, user.uid])
 
     function handleDeleteMessage() {
         try {
@@ -46,7 +60,7 @@ const MessageBubble = memo(({ messageId, lastMessageId, nextMessageId }: Message
         () =>
             !nextMessage
                 ? 0
-                : differenceInMinutes(new Date(nextMessage.createdOn), new Date(message.createdOn)),
+                : differenceInMinutes(nextMessage.createdOn.toDate(), message.createdOn.toDate()),
         [message.createdOn, nextMessage]
     )
 
@@ -54,7 +68,7 @@ const MessageBubble = memo(({ messageId, lastMessageId, nextMessageId }: Message
         () =>
             !lastMessage
                 ? 0
-                : differenceInMinutes(new Date(message.createdOn), new Date(lastMessage.createdOn)),
+                : differenceInMinutes(message.createdOn.toDate(), lastMessage.createdOn.toDate()),
         [lastMessage, message.createdOn]
     )
 
@@ -87,13 +101,20 @@ const MessageBubble = memo(({ messageId, lastMessageId, nextMessageId }: Message
             nextMessage
         ]
     )
+    const lastSeenMessageList = useMemo(
+        () =>
+            nextMessage
+                ? message.seenBy.filter((userId) => !nextMessage.seenBy.includes(userId))
+                : message.seenBy,
+        [message.seenBy, nextMessage]
+    )
 
     return (
         <>
             {lastMessage &&
-                differenceInMinutes(new Date(message.createdOn), new Date(lastMessage?.createdOn)) >
-                    10 && <MessageSeperator createdOn={message.createdOn} />}
-            <div className="">
+                differenceInMinutes(message.createdOn.toDate(), lastMessage.createdOn.toDate()) >
+                    10 && <MessageSeperator createdOn={message.createdOn.toDate()} />}
+            <div ref={messageRef}>
                 <div
                     className={cn(
                         'relative mb-1 flex gap-3',
@@ -148,15 +169,18 @@ const MessageBubble = memo(({ messageId, lastMessageId, nextMessageId }: Message
                         isSelf={isSelf}
                     />
                 </div>
-                {message.reactions && Object.entries(message.reactions.count).length > 0 && (
+                {message.reactions && Object.keys(message.reactions.data).length > 0 && (
                     <div
                         className={cn(
-                            'relative z-30 ml-[3.2rem] flex h-min -translate-y-5 justify-start',
+                            'relative z-30 ml-[3.2rem] flex h-5 -translate-y-4 justify-start',
                             isSelf && 'mr-3 justify-end'
                         )}
                     >
                         <ReactionsTag reactions={message.reactions} />
                     </div>
+                )}
+                {lastSeenMessageList.length !== 0 && (
+                    <SeenContainer key={message.id} userIds={lastSeenMessageList} isSelf={isSelf} />
                 )}
             </div>
         </>

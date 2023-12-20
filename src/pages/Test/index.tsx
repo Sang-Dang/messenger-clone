@@ -25,5 +25,27 @@ export default function Test() {
     //     run()
     // }, [])
 
+    // useEffect(() => {
+    //     async function run() {
+    //         const chatsRef = collection(db, 'chats').withConverter(ChatConverter)
+    //         const chatsSnap = await getDocs(chatsRef)
+    //         chatsSnap.forEach(async (chat) => {
+    //             const messagesRef = collection(db, 'chats', chat.id, 'messages').withConverter(
+    //                 MessageConverter
+    //             )
+    //             const messagesSnap = await getDocs(messagesRef)
+    //             const chatMembers = chat.data().users
+
+    //             messagesSnap.forEach(async (message) => {
+    //                 updateDoc(message.ref, {
+    //                     seenBy: chatMembers
+    //                 })
+    //             })
+    //         })
+    //     }
+
+    //     run()
+    // }, [])
+
     return <div>HELLOWORLD</div>
 }
