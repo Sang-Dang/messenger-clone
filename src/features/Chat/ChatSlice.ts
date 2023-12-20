@@ -1,18 +1,20 @@
-import { Chat } from '@/classes/Chat'
+import { Chat, ChatSerializable } from '@/classes/Chat'
 import { PayloadAction, createSlice } from '@reduxjs/toolkit'
 
 type ChatStateType = {
     value: {
-        [key: string]: Chat
+        list: { [key: string]: ChatSerializable }
+        ids: string[]
     }
-    ids: string[]
     status: 'idle' | 'loading' | 'failed'
     error: string | null
 }
 
 const initialState: ChatStateType = {
-    value: {},
-    ids: [],
+    value: {
+        list: {},
+        ids: []
+    },
     status: 'idle',
     error: null
 }
@@ -21,36 +23,63 @@ export const chatSlice = createSlice({
     name: 'chat',
     initialState,
     reducers: {
-        addChat: (state, action: PayloadAction<Chat>) => {
-            if (!state.ids.includes(action.payload.id)) {
-                state.value[action.payload.id] = action.payload
-                state.ids.push(action.payload.id)
+        chatAdded: {
+            prepare: (chat: Chat) => {
+                return {
+                    payload: {
+                        ...Chat.serialize(chat)
+                    }
+                }
+            },
+            reducer: (state, action: PayloadAction<ChatSerializable>) => {
+                const chat = action.payload
+                if (!state.value.list[chat.id]) {
+                    state.value.ids.push(chat.id)
+                    state.value.list[chat.id] = chat
+                }
             }
         },
-        addMany: (state, action: PayloadAction<Chat[]>) => {
-            action.payload.forEach((chat) => {
-                if (!state.ids.includes(chat.id)) {
-                    state.value[chat.id] = chat
-                    state.ids.push(chat.id)
+        chatUpdated: {
+            prepare(chat: Chat) {
+                return {
+                    payload: {
+                        ...Chat.serialize(chat)
+                    }
                 }
-            })
+            },
+            reducer: (state, action: PayloadAction<ChatSerializable>) => {
+                const chat = action.payload
+                if (state.value.list[chat.id]) state.value.list[chat.id] = chat
+            }
         },
-        removeChat: (state, action: PayloadAction<{ id: string }>) => {
-            state.ids.filter((current) => current !== action.payload.id)
-            delete state.value[action.payload.id]
+        chatRemoved: (state, action: PayloadAction<{ id: string }>) => {
+            const chat = action.payload
+            if (state.value.list[chat.id]) {
+                state.value.ids = state.value.ids.filter((current) => current !== chat.id)
+                delete state.value.list[chat.id]
+            }
         },
-        updateChat: (state, action: PayloadAction<Chat>) => {
-            state.value[action.payload.id] = action.payload
+        loadingToggled: (state, action: PayloadAction<boolean>) => {
+            state.status = action.payload ? 'loading' : 'idle'
         },
-        clearChats: (state) => {
-            state.value = {}
-            state.ids = []
+        errorOccurred: (state, action: PayloadAction<string | null>) => {
+            state.error = action.payload
+        },
+        loadedSuccessfully: (state) => {
+            state.status = 'idle'
+            state.error = null
         }
     }
 })
 
 const chatReducer = chatSlice.reducer
-export const { addChat, removeChat, updateChat, addMany, clearChats } = chatSlice.actions
-export const selectAllChats = (state: ChatStateType) => state.value
+export const {
+    chatAdded,
+    chatUpdated,
+    chatRemoved,
+    loadingToggled,
+    errorOccurred,
+    loadedSuccessfully
+} = chatSlice.actions
 
 export default chatReducer

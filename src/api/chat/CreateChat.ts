@@ -8,9 +8,17 @@ export async function CreateChat(users: string[], chatName?: string, chatAvatar?
         throw new Error('Not enough users to create chat')
     }
 
-    const chat = new Chat('', chatName ?? '', Timestamp.now().toDate().toString(), null, Timestamp.now().toDate().toString(), users, '')
+    const chat = {
+        id: '',
+        avatar: '',
+        chatName: chatName ?? '',
+        createdOn: Timestamp.now(),
+        lastMessage: null,
+        lastUpdatedOn: Timestamp.now(),
+        users: users
+    } satisfies Chat
+
     const docRef = await addDoc(collection(db, 'chats').withConverter(ChatConverter), chat)
-    console.log(chatAvatar)
     if (chatAvatar) {
         const avatarRef = ref(storage, `chatAvatars/${docRef.id}`)
         const avatar = await uploadBytes(avatarRef, chatAvatar)

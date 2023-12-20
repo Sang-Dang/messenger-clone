@@ -96,6 +96,21 @@ export default {
                 p: 'var(--p-font-size)',
                 small: 'var(--small-font-size)',
                 tiny: 'var(--tiny-font-size)'
+            },
+            width: {
+                message: 'var(--message-width)'
+            },
+            maxWidth: {
+                message: 'var(--message-width)'
+            },
+            minHeight: {
+                message: 'var(--message-height)'
+            },
+            maxHeight: {
+                message: 'var(--message-height)'
+            },
+            minWidth: {
+                message: 'var(--message-width)'
             }
         }
     },

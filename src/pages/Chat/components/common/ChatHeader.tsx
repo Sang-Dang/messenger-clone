@@ -1,13 +1,15 @@
 import { Chat } from '@/classes/Chat'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui'
-import { rtdb } from '@/firebase'
+import { rtdb, storage } from '@/firebase'
 import useAppSelector from '@/lib/hooks/useAppSelector'
 import useAuth from '@/lib/hooks/useAuth'
 import { cn } from '@/lib/utils'
 import formatDistance from 'date-fns/formatDistance'
 import { ref } from 'firebase/database'
+import { ref as StorageRef } from 'firebase/storage'
 import { LucideMoreVertical } from 'lucide-react'
 import { useListVals } from 'react-firebase-hooks/database'
+import { useDownloadURL } from 'react-firebase-hooks/storage'
 import { Helmet } from 'react-helmet'
 
 type ChatHeaderProps = {
@@ -22,30 +24,44 @@ export default function ChatHeader({ chat, className }: ChatHeaderProps) {
         .filter(([key]) => recipientsId.includes(key))
         .map(([, value]) => value)
 
+    let avatar = chat.avatar
+    let chatName = chat.chatName
+
     if (recipients.length === 1) {
-        chat.avatar = recipients[0].avatar
-        chat.chatName = recipients[0].name
+        avatar = recipients[0].avatar
+        chatName = recipients[0].name
     }
 
-    const [values] = useListVals(recipients.length === 1 ? ref(rtdb, `users/${recipients[0].id}`) : undefined, {})
+    const [values] = useListVals(
+        recipients.length === 1 ? ref(rtdb, `users/${recipients[0].id}`) : undefined,
+        {}
+    )
+    const isNew =
+        values && new Date(values[1] as unknown as string) > new Date(Date.now() - 5 * 60 * 1000)
 
     return (
         <>
             <Helmet>
-                <title>{chat.chatName} | Chunt</title>
+                <title>{chatName} | Chunt</title>
             </Helmet>
-            <header className={cn('flex w-full items-center gap-5 bg-neutral-200/70 px-[30px] py-[10px]', className)}>
+            <header
+                className={cn(
+                    'flex w-full items-center gap-5 bg-neutral-200/70 px-[30px] py-[10px]',
+                    className
+                )}
+            >
                 <div className="relative">
-                    <Avatar className="h-[45px] w-[45px]">
-                        <AvatarImage src={chat.avatar} alt="avatar" />
-                        <AvatarFallback>{chat.chatName.slice(0, 2)}</AvatarFallback>
-                    </Avatar>
-                    {values && (values[0] as unknown as UserActivity) === 'active' && (
+                    <ChatHeaderAvatar
+                        avatar={avatar}
+                        chatName={chatName}
+                        isGroup={recipients.length !== 1}
+                    />
+                    {isNew && (
                         <div className="absolute bottom-0 right-0 h-4 w-4 rounded-full border-2 border-white bg-green-500" />
                     )}
                 </div>
                 <div className="flex-grow">
-                    <h1 className="text-xl font-semibold">{chat.chatName}</h1>
+                    <h1 className="text-xl font-semibold">{chatName}</h1>
                     {recipients.length !== 1 ? (
                         <p className="text-sm text-neutral-400">
                             {recipients.slice(0, 3).map((cur, index) => (
@@ -58,10 +74,13 @@ export default function ChatHeader({ chat, className }: ChatHeaderProps) {
                     ) : (
                         values && (
                             <p className="text-light text-sm">
-                                {(values[0] as unknown as UserActivity) === 'active'
+                                {isNew
                                     ? 'Active now'
                                     : values && values[1]
-                                      ? `Active ${formatDistance(new Date(), new Date(values[1] as unknown as string))} ago`
+                                      ? `Active ${formatDistance(
+                                            new Date(),
+                                            new Date(values[1] as unknown as string)
+                                        )} ago`
                                       : 'Offline'}
                             </p>
                         )
@@ -72,5 +91,21 @@ export default function ChatHeader({ chat, className }: ChatHeaderProps) {
                 </div>
             </header>
         </>
+    )
+}
+
+type ChatHeaderAvatarProps = {
+    avatar: string
+    chatName: string
+    isGroup?: boolean
+}
+function ChatHeaderAvatar({ avatar, chatName, isGroup }: ChatHeaderAvatarProps) {
+    const [downloadUrl] = useDownloadURL(isGroup ? StorageRef(storage, avatar) : undefined)
+
+    return (
+        <Avatar className="h-[45px] w-[45px]">
+            <AvatarImage src={isGroup ? downloadUrl : avatar} alt="avatar" />
+            <AvatarFallback>{chatName.slice(0, 2)}</AvatarFallback>
+        </Avatar>
     )
 }

@@ -38,8 +38,11 @@ const Navbar = () => {
             <nav className="flex gap-5">
                 <TooltipProvider>
                     <Tooltip>
-                        <TooltipTrigger>
-                            <Button variant={location.pathname === '/' ? 'secondary' : 'ghost'} onClick={() => navigate('/')}>
+                        <TooltipTrigger asChild>
+                            <Button
+                                variant={location.pathname === '/' ? 'secondary' : 'ghost'}
+                                onClick={() => navigate('/')}
+                            >
                                 <Home />
                             </Button>
                         </TooltipTrigger>
@@ -50,8 +53,11 @@ const Navbar = () => {
                 </TooltipProvider>
                 <TooltipProvider>
                     <Tooltip>
-                        <TooltipTrigger>
-                            <Button variant={location.pathname === '/chat' ? 'secondary' : 'ghost'} onClick={() => navigate('/chat')}>
+                        <TooltipTrigger asChild>
+                            <Button
+                                variant={location.pathname === '/chat' ? 'secondary' : 'ghost'}
+                                onClick={() => navigate('/chat')}
+                            >
                                 <MessageCircle />
                             </Button>
                         </TooltipTrigger>
@@ -62,8 +68,11 @@ const Navbar = () => {
                 </TooltipProvider>
                 <TooltipProvider>
                     <Tooltip>
-                        <TooltipTrigger>
-                            <Button variant={location.pathname === '/profile' ? 'secondary' : 'ghost'} onClick={() => navigate('/profile')}>
+                        <TooltipTrigger asChild>
+                            <Button
+                                variant={location.pathname === '/profile' ? 'secondary' : 'ghost'}
+                                onClick={() => navigate('/profile')}
+                            >
                                 <User />
                             </Button>
                         </TooltipTrigger>
@@ -80,14 +89,19 @@ const Navbar = () => {
                     <DropdownMenuTrigger>
                         <Avatar>
                             <AvatarImage src={user.photoURL ?? ''} />
-                            <AvatarFallback className="text-neutral-900">US</AvatarFallback>
+                            <AvatarFallback className="text-neutral-900">
+                                {user.displayName?.slice(0, 2)}
+                            </AvatarFallback>
                         </Avatar>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent>
                         <DropdownMenuLabel>My Account</DropdownMenuLabel>
                         <DropdownMenuSeparator />
                         <DropdownMenuItem>Profile</DropdownMenuItem>
-                        <DropdownMenuItem className="bg-red-500 text-neutral-100" onClick={handleSignout}>
+                        <DropdownMenuItem
+                            className="bg-red-500 text-neutral-100"
+                            onClick={handleSignout}
+                        >
                             Logout
                         </DropdownMenuItem>
                     </DropdownMenuContent>

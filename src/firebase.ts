@@ -5,6 +5,7 @@ import { getAuth } from 'firebase/auth'
 import { getDatabase } from 'firebase/database'
 import { getFirestore } from 'firebase/firestore'
 import { getStorage } from 'firebase/storage'
+import { initializeAppCheck, ReCaptchaV3Provider } from 'firebase/app-check'
 
 // Your web app's Firebase configuration
 // For Firebase JS SDK v7.20.0 and later, measurementId is optional
@@ -26,7 +27,7 @@ export const analytics = getAnalytics(app)
 export const db = getFirestore(app)
 export const storage = getStorage(app)
 export const rtdb = getDatabase(app)
-// export const appCheck = initializeAppCheck(app, {
-//     provider: new ReCaptchaV3Provider('6Lc1_h8pAAAAAD6QuqbiqGnpVaN1xf3ZwbY_xzda'),
-//     isTokenAutoRefreshEnabled: true
-// })
+export const appCheck = initializeAppCheck(app, {
+    provider: new ReCaptchaV3Provider('6Lc1_h8pAAAAAD6QuqbiqGnpVaN1xf3ZwbY_xzda'),
+    isTokenAutoRefreshEnabled: true
+})

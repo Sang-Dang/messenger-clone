@@ -1,12 +1,13 @@
-import { User, UserConverter } from '@/classes/User'
-import { db } from '@/firebase'
-import { PayloadAction, createAsyncThunk, createSlice } from '@reduxjs/toolkit'
-import { collection, documentId, getDocs, query, where } from 'firebase/firestore'
+import { User } from '@/classes/User'
+import { fetchUsers } from '@/features/Users/UsersThunks'
+import { PayloadAction, createSlice } from '@reduxjs/toolkit'
+
+export type usersObj = {
+    [key: string]: User
+}
 
 type UsersSliceType = {
-    users: {
-        [key: string]: User
-    }
+    users: usersObj
     userIds: string[]
     status: 'idle' | 'loading' | 'failed'
     error: string | null
@@ -37,10 +38,8 @@ export const UsersSlice = createSlice({
             state.users[action.payload.id] = action.payload
         },
         manyUsersAdded: (state, action: PayloadAction<User[]>) => {
-            state.userIds = []
-            state.users = {}
             action.payload.forEach((user) => {
-                if (!state.userIds.includes(user.id)) {
+                if (!state.users[user.id]) {
                     state.users[user.id] = user
                     state.userIds.push(user.id)
                 }
@@ -52,31 +51,14 @@ export const UsersSlice = createSlice({
             .addCase(fetchUsers.pending, (state) => {
                 state.status = 'loading'
             })
-            .addCase(fetchUsers.fulfilled, (state, action) => {
+            .addCase(fetchUsers.fulfilled, (state) => {
                 state.status = 'idle'
-                action.payload
             })
             .addCase(fetchUsers.rejected, (state, action) => {
                 state.status = 'failed'
                 state.error = action.error.message ?? null
             })
     }
-})
-
-export const fetchUsers = createAsyncThunk('users/fetchUsers', async (userIds: string[], api) => {
-    if (userIds.length === 0) {
-        return
-    }
-
-    const q = query(collection(db, 'users').withConverter(UserConverter), where(documentId(), 'in', userIds))
-    const documents = await getDocs(q)
-    api.dispatch(
-        manyUsersAdded(
-            documents.docs.map((doc) => ({
-                ...doc.data()
-            }))
-        )
-    )
 })
 
 const usersReducer = UsersSlice.reducer
