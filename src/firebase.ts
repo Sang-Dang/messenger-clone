@@ -10,14 +10,14 @@ import { initializeAppCheck, ReCaptchaV3Provider } from 'firebase/app-check'
 // Your web app's Firebase configuration
 // For Firebase JS SDK v7.20.0 and later, measurementId is optional
 const firebaseConfig: FirebaseOptions = {
-    apiKey: 'AIzaSyBeF8dZQvpvkqV03HCB1dpIthZVBwJ4qkw',
-    authDomain: 'twot-4beac.firebaseapp.com',
-    databaseURL: 'https://twot-4beac-default-rtdb.asia-southeast1.firebasedatabase.app',
-    projectId: 'twot-4beac',
-    storageBucket: 'twot-4beac.appspot.com',
-    messagingSenderId: '12860156642',
-    appId: '1:12860156642:web:6b6ba8ef83cb90e4420cbb',
-    measurementId: 'G-2JQ4X9GGJB'
+    apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
+    authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
+    databaseURL: import.meta.env.VITE_FIREBASE_DATABASE_URL,
+    projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
+    storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
+    messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
+    appId: import.meta.env.VITE_FIREBASE_APP_ID,
+    measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID
 }
 
 // Initialize Firebase
@@ -28,6 +28,6 @@ export const db = getFirestore(app)
 export const storage = getStorage(app)
 export const rtdb = getDatabase(app)
 export const appCheck = initializeAppCheck(app, {
-    provider: new ReCaptchaV3Provider('6Lc1_h8pAAAAAD6QuqbiqGnpVaN1xf3ZwbY_xzda'),
+    provider: new ReCaptchaV3Provider(import.meta.env.VITE_RECAPTCHA_SITE_KEY),
     isTokenAutoRefreshEnabled: true
 })
