@@ -1,12 +1,12 @@
 import chatReducer from '@/features/Chat/ChatSlice'
-import MessagesReducer from '@/features/Messages/MessagesSlice'
+import conversationReducer from '@/features/Conversation.ts/ConversationSlice'
 import usersReducer from '@/features/Users/UsersSlice'
 import { combineReducers, configureStore } from '@reduxjs/toolkit'
 
 const rootReducer = combineReducers({
     chat: chatReducer,
     users: usersReducer,
-    messages: MessagesReducer
+    conversation: conversationReducer
 })
 
 export const store = configureStore({

@@ -1,10 +1,12 @@
-import { MessageConverter } from '@/classes/Message'
+import { Message, MessageConverter } from '@/classes/Message'
 import { db } from '@/firebase'
 import { Timestamp, doc, runTransaction } from 'firebase/firestore'
 
 export async function DeleteMessage(messageId: string, chatId: string) {
     await runTransaction(db, async (transaction) => {
-        const messageRef = doc(db, 'chats', chatId, 'messages', messageId).withConverter(MessageConverter)
+        const messageRef = doc(db, 'chats', chatId, 'messages', messageId).withConverter(
+            MessageConverter
+        )
         const messageSnap = await transaction.get(messageRef)
 
         // Delete all replies
@@ -29,6 +31,17 @@ export async function DeleteMessage(messageId: string, chatId: string) {
             message: '',
             type: 'deleted',
             deletedOn: Timestamp.fromDate(new Date())
+        })
+
+        // Update chat last message
+        const chatRef = doc(db, 'chats', chatId)
+
+        transaction.update(chatRef, {
+            lastMessage: {
+                ...messageData,
+                message: 'Deleted a message',
+                createdOn: new Date().toString()
+            } as Message
         })
     })
 }

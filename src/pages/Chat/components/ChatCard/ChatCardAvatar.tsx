@@ -29,7 +29,7 @@ const ChatCardAvatar = memo(({ className, avatar, fallback }: ChatCardAvatarProp
 
     return (
         <Avatar className={cn(className)}>
-            <AvatarImage src={avatarObj} alt="avatar" className="h-[50px] w-[50px]" />
+            <AvatarImage src={avatarObj} alt="avatar" className="size-[50px]" />
             <AvatarFallback className="h-[50px] w-[50px] text-neutral-900 ">
                 {fallback}
             </AvatarFallback>

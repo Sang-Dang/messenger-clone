@@ -1,7 +1,8 @@
-import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react-swc'
-import url from 'url'
 import path from 'path'
+import url from 'url'
+import { defineConfig } from 'vite'
+import viteCompression from 'vite-plugin-compression'
 
 const __filename = url.fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
@@ -14,19 +15,22 @@ export default defineConfig({
         }
     },
     build: {
+        terserOptions: {
+            format: {
+                comments: false
+            }
+        },
         rollupOptions: {
+            treeshake: true,
             output: {
-                manualChunks(id) {
-                    if (id.includes('node_modules')) {
-                        // if (id.includes('react') || id.includes('react-dom')) {
-                        //     return 'vendor-react'
-                        // }
-
-                        return id.toString().split('node_modules/')[1].split('/')[0].toString()
-                    }
+                manualChunks: {
+                    react: ['react'],
+                    reactDom: ['react-dom'],
+                    reactRouterDom: ['react-router-dom']
                 }
             }
+            // external: ['react', 'react-dom']
         }
     },
-    plugins: [react()]
+    plugins: [react(), viteCompression()]
 })

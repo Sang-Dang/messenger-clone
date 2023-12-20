@@ -36,7 +36,8 @@ export const ChatConverter = {
         return {
             chatName: chat.chatName,
             createdOn: Timestamp.fromDate(new Date(chat.createdOn)),
-            lastMessage: chat.lastMessage !== null ? MessageConverter.toFirestore(chat.lastMessage) : null,
+            lastMessage:
+                chat.lastMessage !== null ? MessageConverter.toFirestore(chat.lastMessage) : null,
             lastUpdatedOn: Timestamp.fromDate(new Date(chat.lastUpdatedOn)),
             users: chat.users.map((user) => doc(db, 'users', user)),
             avatar: chat.avatar
@@ -51,7 +52,7 @@ export const ChatConverter = {
             id,
             data.chatName,
             (data.createdOn as Timestamp).toDate().toString(),
-            lastMessage !== null
+            lastMessage
                 ? // TODO OPTIMIZE THIS SHITTY ASS CODE
                   new Message(
                       lastMessage.id,

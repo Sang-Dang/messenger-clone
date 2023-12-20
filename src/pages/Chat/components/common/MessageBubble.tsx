@@ -4,7 +4,6 @@ import ReplyBasic from '@/classes/ReplyBasic'
 import { User } from '@/classes/User'
 import ReactionSelector from '@/components/ReactionSelector'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui'
-import { SelectChatId } from '@/features/Messages/MessagesSelectors'
 import { storage } from '@/firebase'
 import useAppSelector from '@/lib/hooks/useAppSelector'
 import useAuth from '@/lib/hooks/useAuth'
@@ -20,6 +19,7 @@ import { useDownloadURL } from 'react-firebase-hooks/storage'
 import { ReactionsTag } from './ReactionsTag'
 import { SeenMessage } from '@/api/messages/SeenMessage'
 import { selectUserInIdList } from '@/features/Users/UsersSelectors'
+import { SelectConversationChatId } from '@/features/Conversation.ts/ConversationSelectors'
 
 type Props = {
     data: Message
@@ -35,7 +35,7 @@ export default function MessageBubble({
 }: Props) {
     const { user } = useAuth()
     const [isHovered, setIsHovered] = useState(false)
-    const chatId = useAppSelector(SelectChatId)!
+    const chatId = useAppSelector(SelectConversationChatId)!
     const isMe = sender.id === user.uid
     const isAvatarShown = showAvatar && !isMe
     const hasOnlyEmojis = onlyEmojis(data.message)
@@ -227,7 +227,7 @@ function MessageOptions({
 }: MessageOptionsProps) {
     const { setReply } = useReply()
     const { user } = useAuth()
-    const chatId = useAppSelector(SelectChatId)
+    const chatId = useAppSelector(SelectConversationChatId)
 
     function handleReaction(reaction: string) {
         if (chatId) {

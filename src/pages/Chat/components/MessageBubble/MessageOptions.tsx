@@ -2,7 +2,7 @@ import { ToggleReaction } from '@/api/messages/ToggleReaction'
 import { Message } from '@/classes/Message'
 import ReactionSelector from '@/components/ReactionSelector'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui'
-import { SelectChatId } from '@/features/Messages/MessagesSelectors'
+import { SelectConversationChatId } from '@/features/Conversation.ts/ConversationSelectors'
 import { selectUserById, selectUserInIdList } from '@/features/Users/UsersSelectors'
 import useAppSelector from '@/lib/hooks/useAppSelector'
 import useAuth from '@/lib/hooks/useAuth'
@@ -27,7 +27,7 @@ export default function MessageOptions({
 }: MessageOptionsProps) {
     const { setReply } = useReply()
     const { user } = useAuth()
-    const chatId = useAppSelector(SelectChatId)
+    const chatId = useAppSelector(SelectConversationChatId)
     const sender = useAppSelector(selectUserById(data.userId))
 
     function handleReaction(reaction: string) {

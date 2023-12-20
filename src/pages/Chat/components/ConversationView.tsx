@@ -1,6 +1,6 @@
 import ReplyBasic from '@/classes/ReplyBasic'
 import { selectChatById } from '@/features/Chat/ChatSelectors'
-import { SelectChatId } from '@/features/Messages/MessagesSelectors'
+import { SelectConversationChatId } from '@/features/Conversation.ts/ConversationSelectors'
 import useAppSelector from '@/lib/hooks/useAppSelector'
 import ChatHeader from '@/pages/Chat/components/common/ChatHeader'
 import MessageInputBox from '@/pages/Chat/components/common/MessageInputBox'
@@ -9,7 +9,7 @@ import { MessagesSquare } from 'lucide-react'
 import { createContext, useState } from 'react'
 
 export default function ConversationView() {
-    const chatId = useAppSelector(SelectChatId)
+    const chatId = useAppSelector(SelectConversationChatId)
 
     if (!chatId) {
         return (

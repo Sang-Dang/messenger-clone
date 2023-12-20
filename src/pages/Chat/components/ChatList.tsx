@@ -21,7 +21,6 @@ import { Dispatch, SetStateAction, memo, useState } from 'react'
 import { useCollectionData } from 'react-firebase-hooks/firestore'
 
 const ChatList = memo(() => {
-    console.log('RENDER')
     const { user } = useAuth()
     const dispatch = useAppDispatch()
     const [, loading, error, snapshot] = useCollectionData(

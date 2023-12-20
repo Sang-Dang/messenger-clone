@@ -1,7 +1,7 @@
 import { Message } from '@/classes/Message'
 import { selectChatById } from '@/features/Chat/ChatSelectors'
-import { SelectChatId } from '@/features/Messages/MessagesSelectors'
-import { selectChatId } from '@/features/Messages/MessagesSlice'
+import { SelectConversationChatId } from '@/features/Conversation.ts/ConversationSelectors'
+import { chatSelected } from '@/features/Conversation.ts/ConversationSlice'
 import { selectUserById } from '@/features/Users/UsersSelectors'
 import useAppDispatch from '@/lib/hooks/useAppDispatch'
 import useAppSelector from '@/lib/hooks/useAppSelector'
@@ -9,10 +9,9 @@ import useAuth from '@/lib/hooks/useAuth'
 import { cn } from '@/lib/utils'
 import ChatCardAvatar from '@/pages/Chat/components/ChatCard/ChatCardAvatar'
 import ChatCardLastMessage from '@/pages/Chat/components/ChatCard/ChatCardLastMessage'
+import ChatCardOptions from '@/pages/Chat/components/ChatCard/ChatCardOptions'
 import ChatCardTitle from '@/pages/Chat/components/ChatCard/ChatCardTitle'
-import { lazy, useMemo } from 'react'
-
-const ChatCardOptions = lazy(() => import('@/pages/Chat/components/ChatCard/ChatCardOptions'))
+import { useMemo } from 'react'
 
 type ChatCardProps = {
     chatId: string
@@ -23,9 +22,9 @@ const ChatCard = ({ chatId }: ChatCardProps) => {
 
     const { user } = useAuth()
     const dispatch = useAppDispatch()
-    const selectedChatCard = useAppSelector(SelectChatId)
+    const selectedChatCard = useAppSelector(SelectConversationChatId)
     function handleChangeChat() {
-        dispatch(selectChatId(chat.id))
+        dispatch(chatSelected({ chatId: chat.id }))
     }
     const recipientId = chat.users.filter((cur) => cur !== user.uid)[0]
     const recipient = useAppSelector(selectUserById(recipientId))
