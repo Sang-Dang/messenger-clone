@@ -15,11 +15,6 @@ export default defineConfig({
         }
     },
     build: {
-        terserOptions: {
-            format: {
-                comments: false
-            }
-        },
         rollupOptions: {
             treeshake: true,
             output: {
