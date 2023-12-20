@@ -74,11 +74,6 @@ export default function ChatHeader({ chat, className }: ChatHeaderProps) {
                     ) : (
                         values && (
                             <p className="text-light text-sm">
-                                {/* {(values[0] as unknown as UserActivity) === 'active'
-                                    ? 'Active now'
-                                    : values && values[1]
-                                      ? `Active ${formatDistance(new Date(), new Date(values[1] as unknown as string))} ago`
-                                      : 'Offline'} */}
                                 {isNew
                                     ? 'Active now'
                                     : values && values[1]

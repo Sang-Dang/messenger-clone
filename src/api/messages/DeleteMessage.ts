@@ -30,7 +30,7 @@ export async function DeleteMessage(messageId: string, chatId: string) {
         transaction.update(messageRef, {
             message: '',
             type: 'deleted',
-            deletedOn: Timestamp.fromDate(new Date())
+            deletedOn: Timestamp.now()
         })
 
         // Update chat last message
@@ -40,7 +40,7 @@ export async function DeleteMessage(messageId: string, chatId: string) {
             lastMessage: {
                 ...messageData,
                 message: 'Deleted a message',
-                createdOn: new Date().toString()
+                createdOn: Timestamp.now()
             } as Message
         })
     })

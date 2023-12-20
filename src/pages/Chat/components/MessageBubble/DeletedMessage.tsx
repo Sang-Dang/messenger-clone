@@ -1,10 +1,11 @@
 import { cn } from '@/lib/utils'
+import { memo } from 'react'
 
 type DeletedMessageProps = {
     className?: string
 }
 
-export default function DeletedMessage({ className }: DeletedMessageProps) {
+const DeletedMessage = memo(({ className }: DeletedMessageProps) => {
     return (
         <div
             className={cn(
@@ -17,4 +18,6 @@ export default function DeletedMessage({ className }: DeletedMessageProps) {
             </pre>
         </div>
     )
-}
+})
+
+export default DeletedMessage

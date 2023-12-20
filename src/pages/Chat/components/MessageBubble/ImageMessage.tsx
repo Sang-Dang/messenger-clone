@@ -3,6 +3,7 @@ import { cn } from '@/lib/utils'
 import { Image, Skeleton } from '@nextui-org/react'
 import { ref as storageRef } from 'firebase/storage'
 import { Expand } from 'lucide-react'
+import { memo } from 'react'
 import { useDownloadURL } from 'react-firebase-hooks/storage'
 
 type ImageMessageProps = {
@@ -12,12 +13,7 @@ type ImageMessageProps = {
     imageClassName?: string
 }
 
-export default function ImageMessage({
-    imageUrls,
-    isSelf,
-    className,
-    imageClassName
-}: ImageMessageProps) {
+const ImageMessage = memo(({ imageUrls, isSelf, className, imageClassName }: ImageMessageProps) => {
     const imageFactor = imageUrls.length % 3
 
     return (
@@ -69,7 +65,7 @@ export default function ImageMessage({
             ))}
         </div>
     )
-}
+})
 
 type ImageViewProps = {
     imageUrl: string
@@ -103,3 +99,5 @@ function ImageView({ imageUrl, className, imageClassName }: ImageViewProps) {
         </div>
     )
 }
+
+export default ImageMessage

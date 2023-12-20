@@ -1,3 +1,7 @@
+/**
+ * Rememeber to deserialize message
+ */
+
 import { Message } from '@/classes/Message'
 import { RootState } from '@/store'
 import { createSelector } from '@reduxjs/toolkit'
@@ -15,18 +19,5 @@ export const SelectConversationMessageIds = createSelector(
 export const SelectConversationMessageById = (messageId: string) =>
     createSelector(
         [(state: RootState) => state.conversation.value.messages[messageId]],
-        (message) => message
+        (message) => Message.deserialize(message)
     )
-
-export const SelectConversationMessageByIdToField = (messageId: string, field: keyof Message) => {
-    return createSelector(
-        [(state: RootState) => state.conversation.value.messages[messageId]],
-        (message) => {
-            if (message) {
-                return message[field]
-            } else {
-                return null
-            }
-        }
-    )
-}

@@ -20,19 +20,37 @@ export default function MessageInputBox({ chatId, className }: MessageInputBoxTy
     const inputRef = useRef<HTMLTextAreaElement>(null)
     const { reply, setReply, resetReply } = useReply()
     const [inputImages, setInputImages] = useState<FileList | null>(null)
+    const [isSubmitting, setIsSubmitting] = useState(false)
 
-    const handleSubmit = useCallback(() => {
+    const handleSubmit = useCallback(async () => {
+        setIsSubmitting(true)
         if ((user && messageInput.trim()) || inputImages) {
             try {
-                CreateMessage(user.uid, messageInput.trim(), chatId, 'text', reply ?? undefined, inputImages ?? undefined)
+                CreateMessage(
+                    user.uid,
+                    messageInput.trim(),
+                    chatId,
+                    'text',
+                    reply ?? undefined,
+                    inputImages ?? undefined
+                )
             } catch (error) {
                 console.log(error)
             }
         }
+
         setMessageInput('')
         setInputImages(null)
         resetReply()
+
+        setTimeout(() => {
+            setIsSubmitting(false)
+        }, 100)
     }, [chatId, inputImages, messageInput, reply, resetReply, user])
+
+    useEffect(() => {
+        inputRef.current?.focus()
+    }, [isSubmitting])
 
     function handleChange(value: string) {
         if (value !== '\n') setMessageInput(value)
@@ -55,7 +73,11 @@ export default function MessageInputBox({ chatId, className }: MessageInputBoxTy
     }, [handleSubmit, isFocused])
 
     return (
-        <div className={cn('flex items-end gap-1 p-3', className)} onFocus={() => setIsFocused(true)} onBlur={() => setIsFocused(false)}>
+        <div
+            className={cn('flex items-end gap-1 p-3', className)}
+            onFocus={() => setIsFocused(true)}
+            onBlur={() => setIsFocused(false)}
+        >
             <Button variant="default" className="mr-1 aspect-square h-10 rounded-full p-1">
                 <PlusIcon size={16} />
             </Button>
@@ -68,10 +90,12 @@ export default function MessageInputBox({ chatId, className }: MessageInputBoxTy
                 <Textarea
                     ref={inputRef}
                     classNames={{
-                        inputWrapper: 'rounded-3xl relative z-0 h-auto min-h-full bg-neutral-200/70 pr-10 leading-loose focus-visible:ring-0',
+                        inputWrapper:
+                            'rounded-3xl relative z-0 h-auto min-h-full bg-neutral-200/70 pr-10 leading-loose focus-visible:ring-0',
                         label: 'w-full cursor-default'
                     }}
                     onClear={() => setMessageInput('')}
+                    disabled={isSubmitting}
                     placeholder="Aa"
                     label={
                         <div className="flex h-full flex-col gap-3">
@@ -80,7 +104,11 @@ export default function MessageInputBox({ chatId, className }: MessageInputBoxTy
                                     <div className="flex w-full min-w-max items-center justify-between gap-1">
                                         <span className="">
                                             Responding to{' '}
-                                            <strong className="font-bold">{reply.userId === user.uid ? 'Yourself' : reply.username}</strong>
+                                            <strong className="font-bold">
+                                                {reply.userId === user.uid
+                                                    ? 'Yourself'
+                                                    : reply.username}
+                                            </strong>
                                         </span>
                                         <Button
                                             variant="ghost"
@@ -125,7 +153,12 @@ export default function MessageInputBox({ chatId, className }: MessageInputBoxTy
                     </EmojiSelector>
                 </div>
             </div>
-            <Button className="ml-3 grid aspect-square h-10 place-items-center rounded-full p-3" variant="default" onClick={handleSubmit}>
+            <Button
+                className="ml-3 grid aspect-square h-10 place-items-center rounded-full p-3"
+                variant="default"
+                onClick={handleSubmit}
+                disabled={isSubmitting}
+            >
                 <Send size={16} />
             </Button>
         </div>

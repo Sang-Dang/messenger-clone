@@ -1,10 +1,10 @@
-import { Message } from '@/classes/Message'
+import { Message, MessageSerializable } from '@/classes/Message'
 import { PayloadAction, createSlice } from '@reduxjs/toolkit'
 
 type ConversationStateType = {
     value: {
         messages: {
-            [key: string]: Message
+            [key: string]: MessageSerializable
         }
         messageIds: string[] // sorted
         chatId: string | null
@@ -28,19 +28,41 @@ export const ConversationSlice = createSlice({
     initialState,
     reducers: {
         chatSelected: (state, action: PayloadAction<{ chatId: string }>) => {
-            state.value.chatId = action.payload.chatId
-        },
-        messageAdded: (state, action: PayloadAction<{ message: Message }>) => {
-            const { message } = action.payload
-            if (!state.value.messages[message.id]) {
-                state.value.messages[message.id] = message
-                state.value.messageIds.push(message.id)
+            state.value = {
+                messages: {},
+                messageIds: [],
+                chatId: action.payload.chatId
             }
         },
-        messageUpdated: (state, action: PayloadAction<{ message: Message }>) => {
-            const { message } = action.payload
-            if (state.value.messages[message.id]) {
-                state.value.messages[message.id] = message
+        messageAdded: {
+            prepare(message: Message) {
+                return {
+                    payload: {
+                        ...Message.serialize(message)
+                    }
+                } as PayloadAction<MessageSerializable>
+            },
+            reducer: (state, action: PayloadAction<MessageSerializable>) => {
+                const message = action.payload
+                if (!state.value.messages[message.id]) {
+                    state.value.messages[message.id] = message
+                    state.value.messageIds.push(message.id)
+                }
+            }
+        },
+        messageUpdated: {
+            prepare(message: Message) {
+                return {
+                    payload: {
+                        ...Message.serialize(message)
+                    }
+                } as PayloadAction<MessageSerializable>
+            },
+            reducer: (state, action: PayloadAction<MessageSerializable>) => {
+                const message = action.payload
+                if (state.value.messages[message.id]) {
+                    state.value.messages[message.id] = message
+                }
             }
         }
     }

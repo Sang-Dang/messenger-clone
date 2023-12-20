@@ -85,8 +85,8 @@ function ChatListViewWrapper() {
     chats
         .sort(
             (a, b) =>
-                (a.lastMessage ? new Date(a.lastMessage?.createdOn).getTime() : 0) -
-                (b.lastMessage ? new Date(b.lastMessage?.createdOn).getTime() : 0)
+                (a.lastMessage ? a.lastUpdatedOn.toDate().getTime() : 0) -
+                (b.lastMessage ? b.lastUpdatedOn.toDate().getTime() : 0)
         )
         .reverse()
 
@@ -117,7 +117,7 @@ const ChatListView = memo(
                 />
                 <ScrollArea className="flex-grow overflow-y-auto px-3">
                     {chats.map((chat) => (
-                        <div key={chat} className="my-2 first-of-type:mt-0 last-of-type:mb-0">
+                        <div key={chat} className="my-3 first-of-type:mt-0 last-of-type:mb-0">
                             <ChatCard key={chat} chatId={chat} />
                         </div>
                     ))}

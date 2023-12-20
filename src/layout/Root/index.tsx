@@ -4,19 +4,21 @@ import { Toaster } from '@/components/ui'
 import { fetchUsers } from '@/features/Users/UsersThunks'
 import { auth, db, storage } from '@/firebase'
 import LoadingContextProvider from '@/lib/context/LoadingContext'
+import SlowDownPopup from '@/lib/dialogs/SlowDownPopup'
 import useAppDispatch from '@/lib/hooks/useAppDispatch'
 import useMobile from '@/lib/hooks/useMobile'
 import { NextUIProvider } from '@nextui-org/react'
 import { doc, runTransaction, setDoc } from 'firebase/firestore'
 import { ref, uploadBytes } from 'firebase/storage'
 import { LucideComputer } from 'lucide-react'
-import { useRef } from 'react'
+import { useRef, useState } from 'react'
 import { Outlet } from 'react-router-dom'
 
 export default function RootLayout() {
     const isMobile = useMobile()
     const dispatch = useAppDispatch()
     const userActivityRef = useRef<UserActivity | null>(null)
+    const [open, setOpen] = useState(true)
     if (isMobile) {
         return (
             <div className="flex h-screen w-screen flex-col items-center justify-center bg-red-500">
@@ -87,6 +89,7 @@ export default function RootLayout() {
                 <LoadingContextProvider>
                     <Toaster />
                     <Outlet />
+                    <SlowDownPopup open={open} setOpen={setOpen} />
                 </LoadingContextProvider>
             </NextUIProvider>
         </>

@@ -1,13 +1,9 @@
-import { Message, MessageConverter } from '@/classes/Message'
-import {
-    SelectConversationChatId,
-    SelectConversationMessageIds
-} from '@/features/Conversation.ts/ConversationSelectors'
+import { MessageConverter } from '@/classes/Message'
+import { SelectConversationMessageIds } from '@/features/Conversation.ts/ConversationSelectors'
 import { messageAdded, messageUpdated } from '@/features/Conversation.ts/ConversationSlice'
 import { db } from '@/firebase'
 import useAppDispatch from '@/lib/hooks/useAppDispatch'
 import useAppSelector from '@/lib/hooks/useAppSelector'
-import useAuth from '@/lib/hooks/useAuth'
 import { cn } from '@/lib/utils'
 import MessageBubble from '@/pages/Chat/components/MessageBubble'
 import { collection, orderBy, query } from 'firebase/firestore'
@@ -30,20 +26,18 @@ export default function MessagesViewContainer({ className, chatId }: MessagesVie
     )
 
     if (loadingMessages) {
-        return 'Loading...'
+        return <div className="h-full"></div>
     }
 
     if (errorMessages) {
-        return 'Error'
+        return <div className="h-full">{errorMessages.message}</div>
     }
 
     snapshot?.docChanges().forEach((change) => {
         if (change.type === 'added') {
             dispatch(
                 messageAdded({
-                    message: {
-                        ...change.doc.data()
-                    } as Message
+                    ...change.doc.data()
                 })
             )
         }
@@ -51,9 +45,7 @@ export default function MessagesViewContainer({ className, chatId }: MessagesVie
         if (change.type === 'modified') {
             dispatch(
                 messageUpdated({
-                    message: {
-                        ...change.doc.data()
-                    } as Message
+                    ...change.doc.data()
                 })
             )
         }

@@ -1,7 +1,12 @@
-import ReplyBasic from '@/classes/ReplyBasic'
-import { FirestoreDataConverter, QueryDocumentSnapshot, SnapshotOptions, Timestamp } from 'firebase/firestore'
+import Reply from '@/classes/Reply'
+import {
+    FirestoreDataConverter,
+    QueryDocumentSnapshot,
+    SnapshotOptions,
+    Timestamp
+} from 'firebase/firestore'
 
-export type reactionsType = {
+export type Reactions = {
     data: {
         [userid: string]: string
     }
@@ -14,24 +19,24 @@ export class Message {
     id: string
     userId: string
     message: string
-    createdOn: string
+    createdOn: Timestamp
+    deletedOn: Timestamp | null
+    replyIds: string[]
+    repliedTo: Reply | null
     type: ChatMessageTypes
-    deletedOn: string | null = null
-    replyIds: string[] = []
-    repliedTo: ReplyBasic | null = null
-    reactions: reactionsType
-    seenBy: string[] = []
+    reactions: Reactions
+    seenBy: string[]
 
     constructor(
         id: string,
         userId: string,
         message: string,
-        createdOn: string,
+        createdOn: Timestamp,
         type: ChatMessageTypes,
-        deletedOn: string | null = null,
+        deletedOn: Timestamp | null,
         replies: string[] = [],
-        repliedTo: ReplyBasic | null = null,
-        reactions?: reactionsType,
+        repliedTo: Reply | null,
+        reactions?: Reactions,
         seenBy?: string[]
     ) {
         this.id = id
@@ -48,6 +53,36 @@ export class Message {
         }
         this.seenBy = seenBy ?? []
     }
+
+    static serialize(message: Message): MessageSerializable {
+        return {
+            ...message,
+            createdOn: message.createdOn.toMillis(),
+            deletedOn: message.deletedOn?.toMillis() ?? null
+        } satisfies MessageSerializable
+    }
+
+    static deserialize(data: MessageSerializable): Message | null {
+        return data
+            ? new Message(
+                  data.id,
+                  data.userId,
+                  data.message,
+                  Timestamp.fromMillis(data.createdOn),
+                  data.type,
+                  data.deletedOn ? Timestamp.fromMillis(data.deletedOn) : null,
+                  data.replyIds,
+                  data.repliedTo,
+                  data.reactions,
+                  data.seenBy
+              )
+            : null
+    }
+}
+
+export type MessageSerializable = Omit<Message, 'createdOn' | 'deletedOn'> & {
+    createdOn: number
+    deletedOn: number | null
 }
 
 export const MessageConverter: FirestoreDataConverter<Message> = {
@@ -55,31 +90,29 @@ export const MessageConverter: FirestoreDataConverter<Message> = {
         return {
             userId: message.userId,
             message: message.message,
-            createdOn: Timestamp.fromDate(new Date(message.createdOn)),
+            createdOn: message.createdOn,
             type: message.type,
-            deletedOn: message.deletedOn ? Timestamp.fromDate(new Date(message.deletedOn)) : null,
+            deletedOn: message.deletedOn,
             replyIds: message.replyIds,
             repliedTo: message.repliedTo,
             reactions: message.reactions,
             seenBy: message.seenBy
-        }
-
-        //
+        } satisfies Omit<Message, 'id'>
     },
     fromFirestore: (snapshot: QueryDocumentSnapshot, options: SnapshotOptions) => {
         const data = snapshot.data(options)
-        const id = snapshot.id
-        return {
-            id,
-            userId: data.userId,
-            message: data.message,
-            createdOn: (data.createdOn as Timestamp).toDate().toString(),
-            type: data.type,
-            deletedOn: data.deletedOn ? (data.deletedOn as Timestamp).toDate().toString() : null,
-            replyIds: data.replyIds,
-            repliedTo: data.repliedTo === null ? null : ({ ...data.repliedTo } as ReplyBasic),
-            reactions: data.reactions,
-            seenBy: data.seenBy ?? []
-        } as Message
+
+        return new Message(
+            snapshot.id,
+            data.userId,
+            data.message,
+            data.createdOn,
+            data.type,
+            data.deletedOn,
+            data.replyIds,
+            data.repliedTo,
+            data.reactions,
+            data.seenBy ?? []
+        )
     }
 }
