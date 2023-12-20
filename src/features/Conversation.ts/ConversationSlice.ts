@@ -28,11 +28,12 @@ export const ConversationSlice = createSlice({
     initialState,
     reducers: {
         chatSelected: (state, action: PayloadAction<{ chatId: string }>) => {
-            state.value = {
-                messages: {},
-                messageIds: [],
-                chatId: action.payload.chatId
-            }
+            if (action.payload.chatId !== state.value.chatId)
+                state.value = {
+                    messages: {},
+                    messageIds: [],
+                    chatId: action.payload.chatId
+                }
         },
         messageAdded: {
             prepare(message: Message) {
