@@ -13,7 +13,7 @@ const routes = createBrowserRouter(
             <Route element={<BaseLayout />}>
                 <Route path="/" element={<Home />} />
                 <Route element={<ProtectedRoute />}>
-                    <Route path="/chat/:id?" element={<ChatPage />} />
+                    <Route path="/chat" element={<ChatPage />} />
                     <Route path="/profile" element={<Profile />} />
                 </Route>
             </Route>

@@ -6,13 +6,22 @@ export class User {
     email: string
     avatar: string
     lastLogin: string
+    bio: string | undefined
 
-    constructor(id: string, name: string, email: string, lastLogin: string, avatar?: string) {
+    constructor(
+        id: string,
+        name: string,
+        email: string,
+        lastLogin: string,
+        avatar?: string,
+        bio?: string
+    ) {
         this.id = id
         this.name = name
         this.email = email
         this.avatar = avatar ?? '/img/user-default.jpg'
         this.lastLogin = lastLogin
+        this.bio = bio ?? undefined
     }
 }
 
@@ -22,7 +31,8 @@ export const UserConverter = {
             name: user.name,
             email: user.email,
             avatar: user.avatar,
-            lastLogin: user.lastLogin
+            lastLogin: user.lastLogin,
+            bio: user.bio
         }
     },
     fromFirestore: (snapshot: QueryDocumentSnapshot, options: SnapshotOptions) => {
