@@ -82,7 +82,7 @@ export default function TitleCard() {
             <motion.img
                 variants={imageVariants}
                 animate={isHovered ? 'hover' : 'idle'}
-                src="/svg/light-logo-only-transparent.svg"
+                src="/svg/dark-logo-only-transparent.svg"
                 alt="Chunt"
                 height={50}
                 width={50}
@@ -90,7 +90,11 @@ export default function TitleCard() {
             />
             <div className="flex text-2xl font-extrabold tracking-wider">
                 {APP_NAME.split('').map((letter, index) => (
-                    <motion.p variants={textVariants} animate={currentElement === index ? 'hover' : 'idle'} key={letter + '' + index}>
+                    <motion.p
+                        variants={textVariants}
+                        animate={currentElement === index ? 'hover' : 'idle'}
+                        key={letter + '' + index}
+                    >
                         {letter}
                     </motion.p>
                 ))}

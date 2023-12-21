@@ -24,7 +24,6 @@ const ChatCard = ({ chatId }: ChatCardProps) => {
     const dispatch = useAppDispatch()
     const selectedChatCard = useAppSelector(SelectConversationChatId)
     function handleChangeChat() {
-        console.log('RUN')
         dispatch(chatSelected({ chatId: chat.id }))
     }
     const recipientId = chat.users.filter((cur) => cur !== user.uid)[0]

@@ -18,3 +18,17 @@ export const selectChatsSearch = (search: string) =>
                 .filter((chat) => chat.chatName.toLowerCase().includes(search))
                 .map((chat) => Chat.deserialize(chat))
     )
+
+export const selectChatByIdToField = (
+    id: string,
+    field: keyof Omit<ChatSerializable, 'createdOn' | 'deletedOn'>
+) =>
+    createSelector(
+        [
+            (state: RootState) => {
+                if (!state.chat.value.list[id]) return null
+                return state.chat.value.list[id][field]
+            }
+        ],
+        (value) => value
+    )

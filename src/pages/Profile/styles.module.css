@@ -1,0 +1,16 @@
+.profile_grid {
+    display: grid;
+    grid-template-columns: [outer-start] 200px [inner-start] 20px [content-start] 1fr [content-end] 20px [inner-end] 200px [outer-end];
+}
+
+.profile_grid_outer {
+    grid-column: outer-start / outer-end;
+}
+
+.profile_grid_inner {
+    grid-column: inner-start / inner-end;
+}
+
+.profile_grid_content {
+    grid-column: content-start / content-end;
+}

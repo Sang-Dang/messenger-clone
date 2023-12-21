@@ -9,6 +9,9 @@ type ConversationStateType = {
         messageIds: string[] // sorted
         chatId: string | null
     }
+    metadata: {
+        isChatInfobarOpen: boolean
+    }
     status: 'loading' | 'idle' | 'error'
     error: string | null
 }
@@ -18,6 +21,9 @@ const initialState: ConversationStateType = {
         messages: {},
         messageIds: [],
         chatId: null
+    },
+    metadata: {
+        isChatInfobarOpen: false
     },
     status: 'idle',
     error: null
@@ -65,10 +71,15 @@ export const ConversationSlice = createSlice({
                     state.value.messages[message.id] = message
                 }
             }
+        },
+        toggleChatInfobar: (state, action: PayloadAction<boolean | undefined>) => {
+            const toggleTo = action.payload ?? !state.metadata.isChatInfobarOpen
+            state.metadata.isChatInfobarOpen = toggleTo
         }
     }
 })
 
-export const { chatSelected, messageAdded, messageUpdated } = ConversationSlice.actions
+export const { chatSelected, messageAdded, messageUpdated, toggleChatInfobar } =
+    ConversationSlice.actions
 const conversationReducer = ConversationSlice.reducer
 export default conversationReducer

@@ -1,16 +1,18 @@
 import { Chat } from '@/classes/Chat'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui'
-import { rtdb, storage } from '@/firebase'
+import { SelectChatInfobarOpenState } from '@/features/Conversation.ts/ConversationSelectors'
+import { toggleChatInfobar } from '@/features/Conversation.ts/ConversationSlice'
+import { rtdb } from '@/firebase'
 import useAppSelector from '@/lib/hooks/useAppSelector'
 import useAuth from '@/lib/hooks/useAuth'
 import { cn } from '@/lib/utils'
+import { Button, Tooltip } from '@nextui-org/react'
 import formatDistance from 'date-fns/formatDistance'
 import { ref } from 'firebase/database'
-import { ref as StorageRef } from 'firebase/storage'
-import { LucideMoreVertical } from 'lucide-react'
+import { LucideMoreVertical, MoreHorizontal } from 'lucide-react'
 import { useListVals } from 'react-firebase-hooks/database'
-import { useDownloadURL } from 'react-firebase-hooks/storage'
 import { Helmet } from 'react-helmet'
+import { useDispatch } from 'react-redux'
 
 type ChatHeaderProps = {
     chat: Chat
@@ -23,14 +25,8 @@ export default function ChatHeader({ chat, className }: ChatHeaderProps) {
     const recipients = Object.entries(usersCache)
         .filter(([key]) => recipientsId.includes(key))
         .map(([, value]) => value)
-
-    let avatar = chat.avatar
-    let chatName = chat.chatName
-
-    if (recipients.length === 1) {
-        avatar = recipients[0].avatar
-        chatName = recipients[0].name
-    }
+    const dispatch = useDispatch()
+    const chatInfobarOpen = useAppSelector(SelectChatInfobarOpenState)
 
     const [values] = useListVals(
         recipients.length === 1 ? ref(rtdb, `users/${recipients[0].id}`) : undefined,
@@ -39,29 +35,32 @@ export default function ChatHeader({ chat, className }: ChatHeaderProps) {
     const isNew =
         values && new Date(values[1] as unknown as string) > new Date(Date.now() - 5 * 60 * 1000)
 
+    function handleToggleChatSidebar() {
+        dispatch(toggleChatInfobar())
+    }
+
     return (
         <>
             <Helmet>
-                <title>{chatName} | Chunt</title>
+                <title>{chat.chatName} | Chunt</title>
             </Helmet>
             <header
                 className={cn(
-                    'flex w-full items-center gap-5 bg-neutral-200/70 px-[30px] py-[10px]',
+                    'flex w-full items-center gap-5 border-b-1 border-b-neutral-300 bg-white px-[30px] py-[10px]',
                     className
                 )}
             >
                 <div className="relative">
-                    <ChatHeaderAvatar
-                        avatar={avatar}
-                        chatName={chatName}
-                        isGroup={recipients.length !== 1}
-                    />
+                    <Avatar className="h-[45px] w-[45px]">
+                        <AvatarImage src={chat.avatar} alt="avatar" />
+                        <AvatarFallback>{chat.chatName.slice(0, 2)}</AvatarFallback>
+                    </Avatar>
                     {isNew && (
                         <div className="absolute bottom-0 right-0 h-4 w-4 rounded-full border-2 border-white bg-green-500" />
                     )}
                 </div>
                 <div className="flex-grow">
-                    <h1 className="text-xl font-semibold">{chatName}</h1>
+                    <h1 className="text-xl font-semibold">{chat.chatName}</h1>
                     {recipients.length !== 1 ? (
                         <p className="text-sm text-neutral-400">
                             {recipients.slice(0, 3).map((cur, index) => (
@@ -86,26 +85,17 @@ export default function ChatHeader({ chat, className }: ChatHeaderProps) {
                         )
                     )}
                 </div>
-                <div>
-                    <LucideMoreVertical />
-                </div>
+                <Tooltip content="Conversation Details" placement="bottom">
+                    <Button
+                        isIconOnly
+                        variant="flat"
+                        className="bg-transparent"
+                        onClick={handleToggleChatSidebar}
+                    >
+                        {chatInfobarOpen ? <MoreHorizontal /> : <LucideMoreVertical />}
+                    </Button>
+                </Tooltip>
             </header>
         </>
-    )
-}
-
-type ChatHeaderAvatarProps = {
-    avatar: string
-    chatName: string
-    isGroup?: boolean
-}
-function ChatHeaderAvatar({ avatar, chatName, isGroup }: ChatHeaderAvatarProps) {
-    const [downloadUrl] = useDownloadURL(isGroup ? StorageRef(storage, avatar) : undefined)
-
-    return (
-        <Avatar className="h-[45px] w-[45px]">
-            <AvatarImage src={isGroup ? downloadUrl : avatar} alt="avatar" />
-            <AvatarFallback>{chatName.slice(0, 2)}</AvatarFallback>
-        </Avatar>
     )
 }

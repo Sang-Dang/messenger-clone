@@ -5,7 +5,7 @@ import { PlusSquare } from 'lucide-react'
 
 export default function ChatSidebar() {
     return (
-        <aside className="flex h-fullNoHeader w-[400px] resize-x flex-col rounded-r-lg border-r-2 border-r-neutral-200 bg-secondary p-std shadow-2xl">
+        <aside className="flex h-fullNoHeader w-[400px] resize-x flex-col border-r-1 border-r-neutral-200 bg-white p-std">
             <div className="mb-6 flex items-center gap-3">
                 <h1 className="flex-grow text-h3 font-bold">Chats</h1>
                 <CreateConversationDialog

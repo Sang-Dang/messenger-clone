@@ -56,7 +56,7 @@ function ConversationViewData({ chatId }: ConversationViewDataType) {
             }}
         >
             <div className="flex h-full w-full flex-col">
-                <ChatHeader chat={chat} className="" />
+                <ChatHeader chat={chat} />
                 <MessagesViewContainer chatId={chatId} className="h-1 flex-1" />
                 <MessageInputBox chatId={chatId} className="" />
             </div>

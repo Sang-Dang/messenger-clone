@@ -21,3 +21,8 @@ export const SelectConversationMessageById = (messageId: string) =>
         [(state: RootState) => state.conversation.value.messages[messageId]],
         (message) => Message.deserialize(message)
     )
+
+export const SelectChatInfobarOpenState = createSelector(
+    [(state: RootState) => state.conversation.metadata.isChatInfobarOpen],
+    (isChatSidebarOpen) => isChatSidebarOpen
+)

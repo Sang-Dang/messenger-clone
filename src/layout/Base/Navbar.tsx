@@ -33,7 +33,7 @@ const Navbar = () => {
     }
 
     return (
-        <div className="flex h-header w-full items-center justify-between bg-primary px-8 text-neutral-200">
+        <div className="flex h-header w-full items-center justify-between border-b-2 border-b-neutral-300 bg-white px-8 text-neutral-800">
             <TitleCard />
             <nav className="flex gap-5">
                 <TooltipProvider>

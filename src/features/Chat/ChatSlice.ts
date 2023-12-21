@@ -1,4 +1,5 @@
 import { Chat, ChatSerializable } from '@/classes/Chat'
+import { chatLoadedWithImages } from '@/features/Chat/ChatThunks'
 import { PayloadAction, createSlice } from '@reduxjs/toolkit'
 
 type ChatStateType = {
@@ -49,7 +50,12 @@ export const chatSlice = createSlice({
             },
             reducer: (state, action: PayloadAction<ChatSerializable>) => {
                 const chat = action.payload
-                if (state.value.list[chat.id]) state.value.list[chat.id] = chat
+                if (state.value.list[chat.id])
+                    state.value.list[chat.id] = {
+                        ...chat,
+                        avatar: state.value.list[chat.id].avatar,
+                        chatName: state.value.list[chat.id].chatName
+                    }
             }
         },
         chatRemoved: (state, action: PayloadAction<{ id: string }>) => {

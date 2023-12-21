@@ -1,4 +1,5 @@
 import { Chat, ChatConverter } from '@/classes/Chat'
+import LastMessage from '@/classes/LastMessage'
 import { Message } from '@/classes/Message'
 import { Input, ScrollArea } from '@/components/ui'
 import { selectChatsSearch } from '@/features/Chat/ChatSelectors'
@@ -10,6 +11,7 @@ import {
     loadedSuccessfully,
     loadingToggled
 } from '@/features/Chat/ChatSlice'
+import { chatLoadedWithImages } from '@/features/Chat/ChatThunks'
 import { fetchUsers } from '@/features/Users/UsersThunks'
 import { db } from '@/firebase'
 import useAppDispatch from '@/lib/hooks/useAppDispatch'
@@ -42,15 +44,18 @@ const ChatList = memo(() => {
     snapshot?.docChanges().forEach((change) => {
         if (change.type === 'added') {
             // avoid serializing the lastMessage object
-            dispatch(
-                chatAdded({
-                    ...change.doc.data(),
-                    lastMessage: {
-                        ...change.doc.data().lastMessage
-                    } as Message
-                } as Chat)
-            )
             dispatch(fetchUsers(change.doc.data().users))
+            dispatch(
+                chatLoadedWithImages({
+                    chat: {
+                        ...change.doc.data(),
+                        lastMessage: {
+                            ...change.doc.data().lastMessage
+                        } as LastMessage
+                    } as Chat,
+                    userId: user.uid
+                })
+            )
         }
         if (change.type === 'modified') {
             // avoid serializing the lastMessage object

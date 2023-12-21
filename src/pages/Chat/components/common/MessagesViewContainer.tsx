@@ -1,4 +1,5 @@
 import { MessageConverter } from '@/classes/Message'
+import LoadingSpinner from '@/components/LoadingSpinner'
 import { SelectConversationMessageIds } from '@/features/Conversation.ts/ConversationSelectors'
 import { messageAdded, messageUpdated } from '@/features/Conversation.ts/ConversationSlice'
 import { db } from '@/firebase'
@@ -7,6 +8,7 @@ import useAppSelector from '@/lib/hooks/useAppSelector'
 import { cn } from '@/lib/utils'
 import MessageBubble from '@/pages/Chat/components/MessageBubble'
 import { collection, orderBy, query } from 'firebase/firestore'
+import { AnimatePresence, motion } from 'framer-motion'
 import { MessageSquare } from 'lucide-react'
 import { useEffect, useRef } from 'react'
 import { useCollectionData } from 'react-firebase-hooks/firestore'
@@ -25,13 +27,19 @@ export default function MessagesViewContainer({ className, chatId }: MessagesVie
         ).withConverter(MessageConverter)
     )
 
-    if (loadingMessages) {
-        return <div className="h-full"></div>
-    }
+    // if (loadingMessages) {
+    //     return (
+    //         <div className="grid h-full w-full place-items-center">
+    //             <AnimatePresence mode="popLayout">
+    //                 <LoadingSpinner type="dark" className="h-20 w-20" />
+    //             </AnimatePresence>
+    //         </div>
+    //     )
+    // }
 
-    if (errorMessages) {
-        return <div className="h-full">{errorMessages.message}</div>
-    }
+    // if (errorMessages) {
+    //     return <div className="h-full">{errorMessages.message}</div>
+    // }
 
     snapshot?.docChanges().forEach((change) => {
         if (change.type === 'added') {
@@ -51,7 +59,28 @@ export default function MessagesViewContainer({ className, chatId }: MessagesVie
         }
     })
 
-    return <MessagesView className={className} />
+    return (
+        <AnimatePresence mode="sync" presenceAffectsLayout initial={false}>
+            {loadingMessages ? (
+                <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    className="grid h-full w-full place-items-center"
+                >
+                    <img
+                        src="/svg/dark-logo-only-transparent.svg"
+                        alt="loader..."
+                        className="h-32 w-32"
+                    />
+                </motion.div>
+            ) : errorMessages ? (
+                <div className="h-full">{errorMessages.message}</div>
+            ) : (
+                <MessagesView className={cn('h-full', className)} />
+            )}
+        </AnimatePresence>
+    )
 }
 
 type MessagesViewProps = {
