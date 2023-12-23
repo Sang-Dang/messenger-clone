@@ -6,7 +6,7 @@ export class User {
     email: string
     avatar: string
     lastLogin: string
-    bio: string | undefined
+    bio: string | null
 
     constructor(
         id: string,
@@ -21,7 +21,7 @@ export class User {
         this.email = email
         this.avatar = avatar ?? '/img/user-default.jpg'
         this.lastLogin = lastLogin
-        this.bio = bio ?? undefined
+        this.bio = bio ?? null
     }
 }
 

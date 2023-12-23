@@ -1,5 +1,4 @@
 import { MessageConverter } from '@/classes/Message'
-import LoadingSpinner from '@/components/LoadingSpinner'
 import { SelectConversationMessageIds } from '@/features/Conversation.ts/ConversationSelectors'
 import { messageAdded, messageUpdated } from '@/features/Conversation.ts/ConversationSlice'
 import { db } from '@/firebase'

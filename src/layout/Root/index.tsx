@@ -42,18 +42,18 @@ export default function RootLayout() {
                 const docRef = doc(db, 'users', user.uid).withConverter(UserConverter)
                 const docSnap = await transaction.get(docRef)
 
-                if (!docSnap.exists()) {
+                if (!docRef || !docSnap.exists()) {
                     isFirstLogin = true
-                    setDoc(
-                        docRef,
-                        new User(
+                    await setDoc(docRef, {
+                        ...new User(
                             user.uid,
                             user.displayName ?? '',
                             user.email ?? '',
                             user.metadata.lastSignInTime ?? new Date().toString(),
-                            avatarUrl
+                            avatarUrl,
+                            undefined
                         )
-                    )
+                    })
                 }
             })
 

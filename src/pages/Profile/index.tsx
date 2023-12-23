@@ -1,10 +1,10 @@
 import { Separator } from '@/components/ui'
 import useAuth from '@/lib/hooks/useAuth'
 import { cn } from '@/lib/utils'
-import { Avatar, Button, Input } from '@nextui-org/react'
+import ProfileCard from '@/pages/Profile/ProfileCard'
+import { Avatar, Button } from '@nextui-org/react'
 import { Pen } from 'lucide-react'
 import styles from './styles.module.css'
-import ProfileCard from '@/pages/Profile/ProfileCard'
 
 export default function Profile() {
     const { user } = useAuth()

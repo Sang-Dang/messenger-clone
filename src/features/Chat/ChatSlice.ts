@@ -1,5 +1,4 @@
 import { Chat, ChatSerializable } from '@/classes/Chat'
-import { chatLoadedWithImages } from '@/features/Chat/ChatThunks'
 import { PayloadAction, createSlice } from '@reduxjs/toolkit'
 
 type ChatStateType = {

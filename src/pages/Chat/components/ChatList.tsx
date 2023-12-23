@@ -4,7 +4,6 @@ import { Message } from '@/classes/Message'
 import { Input, ScrollArea } from '@/components/ui'
 import { selectChatsSearch } from '@/features/Chat/ChatSelectors'
 import {
-    chatAdded,
     chatRemoved,
     chatUpdated,
     errorOccurred,
